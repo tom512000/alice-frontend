@@ -45,11 +45,12 @@ export function parseApiError(error: AxiosError<HydraError>): ApiError {
     }
   }
 
+  const fallbackData = data as unknown as Record<string, string>;
   const message =
     data['hydra:description'] ||
     data['hydra:title'] ||
-    (data as Record<string, string>)['description'] ||
-    (data as Record<string, string>)['title'] ||
+    fallbackData['description'] ||
+    fallbackData['title'] ||
     'Une erreur est survenue';
 
   return { message, status, violations };
