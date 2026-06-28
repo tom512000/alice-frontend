@@ -1,0 +1,19 @@
+services:
+  alice-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alice_frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=http://alice_nginx:80
+    networks:
+      - alice_network
+    depends_on:
+      - alice_nginx
+    restart: unless-stopped
+
+networks:
+  alice_network:
+    external: true
