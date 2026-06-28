@@ -1,0 +1,29 @@
+export const ENDPOINTS = {
+  LOGIN: '/login_check',
+  USERS: 'users',
+  PATIENTS: 'patients',
+  APPOINTMENTS: 'appointments',
+  CONSULTATIONS: 'consultations',
+  STAYS: 'stays',
+  OBSERVATIONS: 'observations',
+  VITAL_SIGNS: 'vital_signs',
+  MEDICAL_EXAMS: 'medical_exams',
+  MEDICAL_HISTORIES: 'medical_histories',
+  DIAGNOSES: 'diagnoses',
+  PRESCRIPTIONS: 'prescriptions',
+  TREATMENTS: 'treatments',
+  TAKES: 'takes',
+  MEDICINES: 'medicines',
+  PATHOLOGIES: 'pathologies',
+  ALLERGIES: 'allergies',
+  DOCUMENTS: 'documents',
+  COMMENTS: 'comments',
+  SERVICES: 'services',
+  SPECIALTIES: 'specialties',
+  HOLIDAYS: 'holidays',
+  SURGICAL_OPERATIONS: 'surgical_operations',
+  TREAT_PEOPLE: 'treat_people',
+} as const;
+
+export type EndpointKey = keyof typeof ENDPOINTS;
+export type EndpointValue = (typeof ENDPOINTS)[EndpointKey];
