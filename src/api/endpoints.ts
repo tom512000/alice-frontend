@@ -23,6 +23,9 @@ export const ENDPOINTS = {
   HOLIDAYS: 'holidays',
   SURGICAL_OPERATIONS: 'surgical_operations',
   TREAT_PEOPLE: 'treat_people',
+  ICD10_CODES: 'icd10_codes',
+  AUDIT_LOGS: 'audit_logs',
+  CONSENTS: 'consents',
 } as const;
 
 export type EndpointKey = keyof typeof ENDPOINTS;

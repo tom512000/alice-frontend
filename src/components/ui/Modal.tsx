@@ -70,6 +70,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   title?: string;
   message?: string;
+  confirmLabel?: string;
   loading?: boolean;
 }
 
@@ -79,17 +80,18 @@ export function ConfirmModal({
   onConfirm,
   title = 'Confirmer la suppression',
   message = 'Cette action est irréversible. Voulez-vous continuer ?',
+  confirmLabel = 'Supprimer',
   loading,
 }: ConfirmModalProps) {
   return (
     <Modal open={open} onClose={onClose} title={title} size="sm">
-      <p className="text-sm text-gray-600 font-poppins mb-5">{message}</p>
+      <p className="text-sm text-gray-600 font-poppins mb-5 whitespace-pre-line">{message}</p>
       <div className="flex gap-2 justify-end">
         <Button variant="outline" size="sm" onClick={onClose} disabled={loading}>
           Annuler
         </Button>
         <Button variant="danger" size="sm" onClick={onConfirm} loading={loading}>
-          Supprimer
+          {confirmLabel}
         </Button>
       </div>
     </Modal>

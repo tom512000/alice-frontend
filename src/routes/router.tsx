@@ -59,6 +59,28 @@ import { MedicalHistoryFormPage } from '@/features/medicalHistories/pages/Medica
 import { TreatmentListPage } from '@/features/treatments/pages/TreatmentListPage';
 import { TreatmentFormPage } from '@/features/treatments/pages/TreatmentFormPage';
 
+// Takes
+import { TakeListPage } from '@/features/takes/pages/TakeListPage';
+import { TakeFormPage } from '@/features/takes/pages/TakeFormPage';
+
+// Comments
+import { CommentListPage } from '@/features/comments/pages/CommentListPage';
+import { CommentFormPage } from '@/features/comments/pages/CommentFormPage';
+
+// Documents
+import { DocumentListPage } from '@/features/documents/pages/DocumentListPage';
+import { DocumentFormPage } from '@/features/documents/pages/DocumentFormPage';
+
+// Consents (RGPD)
+import { ConsentListPage } from '@/features/consents/pages/ConsentListPage';
+import { ConsentFormPage } from '@/features/consents/pages/ConsentFormPage';
+
+// Security (2FA)
+import { SecuritySettingsPage } from '@/features/security/pages/SecuritySettingsPage';
+
+// Audit log (admin)
+import { AuditLogListPage } from '@/features/audit/pages/AuditLogListPage';
+
 // Admin / Users
 import { UserListPage } from '@/features/users/pages/UserListPage';
 import { UserFormPage } from '@/features/users/pages/UserFormPage';
@@ -146,6 +168,29 @@ export const router = createBrowserRouter([
       { path: '/treatments/new', element: <TreatmentFormPage /> },
       { path: '/treatments/:id/edit', element: <TreatmentFormPage /> },
 
+      // Takes
+      { path: '/takes', element: <TakeListPage /> },
+      { path: '/takes/new', element: <TakeFormPage /> },
+      { path: '/takes/:id/edit', element: <TakeFormPage /> },
+
+      // Comments
+      { path: '/comments', element: <CommentListPage /> },
+      { path: '/comments/new', element: <CommentFormPage /> },
+      { path: '/comments/:id/edit', element: <CommentFormPage /> },
+
+      // Documents
+      { path: '/documents', element: <DocumentListPage /> },
+      { path: '/documents/new', element: <DocumentFormPage /> },
+      { path: '/documents/:id/edit', element: <DocumentFormPage /> },
+
+      // Consents (RGPD)
+      { path: '/consents', element: <ConsentListPage /> },
+      { path: '/consents/new', element: <ConsentFormPage /> },
+      { path: '/consents/:id/edit', element: <ConsentFormPage /> },
+
+      // Sécurité du compte (2FA)
+      { path: '/settings/security', element: <SecuritySettingsPage /> },
+
       // Admin
       {
         element: <AdminRoute />,
@@ -153,6 +198,7 @@ export const router = createBrowserRouter([
           { path: '/admin/users', element: <UserListPage /> },
           { path: '/admin/users/new', element: <UserFormPage /> },
           { path: '/admin/users/:id/edit', element: <UserFormPage /> },
+          { path: '/admin/audit', element: <AuditLogListPage /> },
           { path: '/admin/services', element: <ServicesPage /> },
           { path: '/admin/specialties', element: <SpecialtiesPage /> },
           { path: '/admin/medicines', element: <MedicinesPage /> },

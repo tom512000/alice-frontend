@@ -15,9 +15,9 @@ import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
 import { useToast } from '@/components/ui/Toast';
 import { IRI } from '@/lib/iri';
-import { formatName, formatDateInput } from '@/lib/format';
+import { formatName, formatDateInput, IDENTITY_STATUS_LABELS } from '@/lib/format';
 import { Save, ArrowLeft } from 'lucide-react';
-import type { PatientWrite } from '@/types/entities';
+import type { PatientWrite, IdentityStatus } from '@/types/entities';
 
 const schema = z.object({
   lastname: z.string().min(1, 'Nom requis'),
@@ -25,6 +25,10 @@ const schema = z.object({
   gender: z.enum(['M', 'F', 'O']).optional().nullable(),
   birthdate: z.string().optional().nullable(),
   nss: z.string().regex(/^\d{13}$/, 'NSS : 13 chiffres').optional().nullable().or(z.literal('')),
+  insMatricule: z.string().regex(/^\d{15}$/, 'Matricule INS : 15 chiffres').optional().nullable().or(z.literal('')),
+  insOid: z.string().optional().nullable(),
+  birthPlaceCode: z.string().optional().nullable(),
+  identityStatus: z.enum(['provisional', 'retrieved', 'validated', 'qualified', 'doubtful']),
   bloodType: z.string().optional().nullable(),
   email: z.string().email('Email invalide').optional().nullable().or(z.literal('')),
   street: z.string().optional().nullable(),
@@ -52,7 +56,7 @@ export function PatientFormPage() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { identityStatus: 'provisional' } });
 
   useEffect(() => {
     dispatch(usersActions.fetchList({ page: 1, itemsPerPage: 100 }));
@@ -66,6 +70,10 @@ export function PatientFormPage() {
             gender: p.gender,
             birthdate: formatDateInput(p.birthdate),
             nss: p.nss ?? '',
+            insMatricule: p.insMatricule ?? '',
+            insOid: p.insOid ?? '',
+            birthPlaceCode: p.birthPlaceCode ?? '',
+            identityStatus: p.identityStatus ?? 'provisional',
             bloodType: p.bloodType ?? '',
             email: p.email ?? '',
             street: p.street ?? '',
@@ -88,6 +96,10 @@ export function PatientFormPage() {
       gender: data.gender || null,
       birthdate: data.birthdate || null,
       nss: data.nss || null,
+      insMatricule: data.insMatricule || null,
+      insOid: data.insOid || null,
+      birthPlaceCode: data.birthPlaceCode || null,
+      identityStatus: data.identityStatus,
       bloodType: data.bloodType || null,
       email: data.email || null,
       street: data.street || null,
@@ -171,6 +183,26 @@ export function PatientFormPage() {
                     options={doctorOptions}
                     error={errors.treatingDoctor?.message}
                   />
+                </FormGrid>
+              </FormSection>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardBody>
+              <FormSection title="Identité Nationale de Santé (INS)">
+                <FormGrid cols={2}>
+                  <Input label="Matricule INS (15 chiffres)" {...register('insMatricule')} error={errors.insMatricule?.message} placeholder="2 55 08 14 168 025 38" />
+                  <Select
+                    label="Statut d'identité"
+                    {...register('identityStatus')}
+                    options={Object.entries(IDENTITY_STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+                    error={errors.identityStatus?.message}
+                  />
+                </FormGrid>
+                <FormGrid cols={2}>
+                  <Input label="OID autorité d'affectation" {...register('insOid')} placeholder="1.2.250.1.213.1.4.8" />
+                  <Input label="Code INSEE lieu de naissance" {...register('birthPlaceCode')} placeholder="75056" />
                 </FormGrid>
               </FormSection>
             </CardBody>

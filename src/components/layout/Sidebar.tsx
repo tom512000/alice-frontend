@@ -6,6 +6,8 @@ import {
   LayoutDashboard, Users, UserSquare2, Calendar, Stethoscope,
   BedDouble, HeartPulse, FlaskConical, ClipboardList, Pill,
   Scissors, Shield, ChevronRight, Hospital, Activity,
+  FileText, MessageSquare, ClipboardCheck,
+  FileCheck, ScrollText, Lock,
 } from 'lucide-react';
 
 interface NavItem {
@@ -37,6 +39,7 @@ function buildNav(roles: string[]): NavGroup[] {
         { to: '/stays', icon: <BedDouble className="h-4 w-4" />, label: 'Hospitalisations' },
         { to: '/observations', icon: <Activity className="h-4 w-4" />, label: 'Soins infirmiers' },
         { to: '/vital-signs', icon: <HeartPulse className="h-4 w-4" />, label: 'Constantes vitales' },
+        { to: '/takes', icon: <ClipboardCheck className="h-4 w-4" />, label: 'Prises de traitement' },
       ],
     },
     {
@@ -46,6 +49,15 @@ function buildNav(roles: string[]): NavGroup[] {
         { to: '/medical-exams', icon: <FlaskConical className="h-4 w-4" />, label: 'Examens médicaux' },
         { to: '/prescriptions', icon: <Pill className="h-4 w-4" />, label: 'Prescriptions' },
         { to: '/surgical-operations', icon: <Scissors className="h-4 w-4" />, label: 'Bloc opératoire' },
+        { to: '/documents', icon: <FileText className="h-4 w-4" />, label: 'Documents' },
+        { to: '/comments', icon: <MessageSquare className="h-4 w-4" />, label: 'Commentaires' },
+        { to: '/consents', icon: <FileCheck className="h-4 w-4" />, label: 'Consentements' },
+      ],
+    },
+    {
+      label: 'Mon compte',
+      items: [
+        { to: '/settings/security', icon: <Lock className="h-4 w-4" />, label: 'Sécurité (2FA)' },
       ],
     },
   ];
@@ -55,6 +67,7 @@ function buildNav(roles: string[]): NavGroup[] {
       label: 'Administration',
       items: [
         { to: '/admin/users', icon: <Users className="h-4 w-4" />, label: 'Utilisateurs', roles: ['ROLE_ADMIN'] },
+        { to: '/admin/audit', icon: <ScrollText className="h-4 w-4" />, label: "Journal d'audit", roles: ['ROLE_ADMIN'] },
         { to: '/admin/services', icon: <Hospital className="h-4 w-4" />, label: 'Services' },
         { to: '/admin/medicines', icon: <Pill className="h-4 w-4" />, label: 'Médicaments' },
         { to: '/admin/pathologies', icon: <Shield className="h-4 w-4" />, label: 'Pathologies' },
