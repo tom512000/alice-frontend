@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { AuthState, LoginCredentials, AuthUser } from '@/types/auth';
+import type { AuthState, LoginCredentials, LoginResponse, AuthUser } from '@/types/auth';
 import { apiClient } from '@/api/client';
 import { ENDPOINTS } from '@/api/endpoints';
 import type { ApiError } from '@/types/api';
@@ -38,17 +38,20 @@ const initialState: AuthState = {
 };
 
 export const login = createAsyncThunk<
-  { token: string; user: AuthUser },
+  { token: string; user: AuthUser } | { requires2fa: true; preAuthToken: string },
   LoginCredentials,
   { rejectValue: string }
 >('auth/login', async (credentials, { rejectWithValue }) => {
   try {
-    const response = await apiClient.post<{ token: string }>(
+    const response = await apiClient.post<LoginResponse>(
       ENDPOINTS.LOGIN,
       credentials,
       { headers: { 'Content-Type': 'application/json' } }
     );
-    const { token } = response.data;
+    if (response.data.requires2fa) {
+      return { requires2fa: true, preAuthToken: response.data.preAuthToken ?? '' };
+    }
+    const token = response.data.token ?? '';
     const user = decodeJwt(token);
     if (!user) throw new Error('Token invalide');
     localStorage.setItem('alice_token', token);
@@ -58,6 +61,29 @@ export const login = createAsyncThunk<
     return rejectWithValue(
       apiErr.message || 'Identifiants incorrects'
     );
+  }
+});
+
+/** Étape 2 du login quand la 2FA est activée : échange le code TOTP contre le vrai JWT. */
+export const verifyTwoFactorLogin = createAsyncThunk<
+  { token: string; user: AuthUser },
+  { preAuthToken: string; code: string },
+  { rejectValue: string }
+>('auth/verifyTwoFactorLogin', async ({ preAuthToken, code }, { rejectWithValue }) => {
+  try {
+    const response = await apiClient.post<{ token: string }>(
+      '/2fa/login-verify',
+      { preAuthToken, code },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    const { token } = response.data;
+    const user = decodeJwt(token);
+    if (!user) throw new Error('Token invalide');
+    localStorage.setItem('alice_token', token);
+    return { token, user };
+  } catch (err) {
+    const apiErr = err as ApiError;
+    return rejectWithValue(apiErr.message || 'Code invalide');
   }
 });
 
@@ -84,14 +110,33 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
+        state.error = null;
+        if ('requires2fa' in action.payload) {
+          return;
+        }
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? 'Erreur de connexion';
+        state.isAuthenticated = false;
+      })
+      .addCase(verifyTwoFactorLogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyTwoFactorLogin.fulfilled, (state, action) => {
+        state.loading = false;
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.error = null;
       })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(verifyTwoFactorLogin.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Erreur de connexion';
+        state.error = action.payload ?? 'Code invalide';
         state.isAuthenticated = false;
       });
   },

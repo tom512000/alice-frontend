@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import QRCode from 'qrcode';
 import { PageHeader } from '@/components/layout/Layout';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -17,6 +18,7 @@ export function SecuritySettingsPage() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [step, setStep] = useState<Step>('idle');
   const [setup, setSetup] = useState<TwoFactorSetup | null>(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -25,6 +27,7 @@ export function SecuritySettingsPage() {
     try {
       const data = await setupTwoFactor();
       setSetup(data);
+      setQrCodeDataUrl(await QRCode.toDataURL(data.otpauthUri, { width: 220, margin: 1 }));
       setStep('configuring');
     } catch {
       toastError("Impossible de démarrer la configuration 2FA.");
@@ -40,6 +43,7 @@ export function SecuritySettingsPage() {
       setEnabled(true);
       setStep('idle');
       setSetup(null);
+      setQrCodeDataUrl(null);
       setCode('');
       toastSuccess('Double authentification activée.');
     } catch {
@@ -126,15 +130,23 @@ export function SecuritySettingsPage() {
               <h3 className="font-lexend font-semibold text-gray-900 mb-3">Étapes de configuration</h3>
               <ol className="list-decimal ml-5 space-y-3 text-sm text-gray-700 font-poppins">
                 <li>
-                  Ajoutez cette clé dans votre application d'authentification (saisie manuelle) :
-                  <div className="mt-1 rounded-md bg-gray-50 border border-gray-200 px-3 py-2 font-mono text-sm break-all select-all">
-                    {setup.secret}
+                  Scannez ce QR code avec Google Authenticator (ou toute autre application TOTP) :
+                  <div className="mt-2 flex justify-center">
+                    {qrCodeDataUrl && (
+                      <img
+                        src={qrCodeDataUrl}
+                        alt="QR code d'appairage 2FA"
+                        className="rounded-md border border-gray-200 bg-white p-2"
+                        width={220}
+                        height={220}
+                      />
+                    )}
                   </div>
                 </li>
                 <li>
-                  Ou collez l'URI d'appairage :
-                  <div className="mt-1 rounded-md bg-gray-50 border border-gray-200 px-3 py-2 font-mono text-xs break-all select-all">
-                    {setup.otpauthUri}
+                  Impossible de scanner ? Saisissez cette clé manuellement dans l'application :
+                  <div className="mt-1 rounded-md bg-gray-50 border border-gray-200 px-3 py-2 font-mono text-sm break-all select-all">
+                    {setup.secret}
                   </div>
                 </li>
                 <li>
@@ -144,7 +156,7 @@ export function SecuritySettingsPage() {
                       <Input label="Code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" inputMode="numeric" />
                     </div>
                     <Button onClick={handleEnable} loading={busy}>Activer</Button>
-                    <Button variant="ghost" onClick={() => { setStep('idle'); setSetup(null); setCode(''); }}>Annuler</Button>
+                    <Button variant="ghost" onClick={() => { setStep('idle'); setSetup(null); setQrCodeDataUrl(null); setCode(''); }}>Annuler</Button>
                   </div>
                 </li>
               </ol>
