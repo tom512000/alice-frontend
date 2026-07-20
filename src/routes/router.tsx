@@ -78,6 +78,10 @@ import { ConsentFormPage } from '@/features/consents/pages/ConsentFormPage';
 // Security (2FA)
 import { SecuritySettingsPage } from '@/features/security/pages/SecuritySettingsPage';
 
+// Rooms & beds (plan visuel)
+import { BedBoardPage } from '@/features/rooms/pages/BedBoardPage';
+import { RoomPlanEditorPage } from '@/features/rooms/pages/RoomPlanEditorPage';
+
 // Audit log (admin)
 import { AuditLogListPage } from '@/features/audit/pages/AuditLogListPage';
 
@@ -124,6 +128,9 @@ export const router = createBrowserRouter([
       { path: '/stays/new', element: <StayFormPage /> },
       { path: '/stays/:id', element: <StayDetailPage /> },
       { path: '/stays/:id/edit', element: <StayFormPage /> },
+
+      // Chambres & lits (plan visuel)
+      { path: '/beds', element: <BedBoardPage /> },
 
       // Observations
       { path: '/observations', element: <ObservationListPage /> },
@@ -199,6 +206,7 @@ export const router = createBrowserRouter([
           { path: '/admin/users/new', element: <UserFormPage /> },
           { path: '/admin/users/:id/edit', element: <UserFormPage /> },
           { path: '/admin/audit', element: <AuditLogListPage /> },
+          { path: '/admin/room-plan', element: <RoomPlanEditorPage /> },
           { path: '/admin/services', element: <ServicesPage /> },
           { path: '/admin/specialties', element: <SpecialtiesPage /> },
           { path: '/admin/medicines', element: <MedicinesPage /> },

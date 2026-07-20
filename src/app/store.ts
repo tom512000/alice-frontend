@@ -26,6 +26,8 @@ import documentsReducer from '@/features/documents/documentsSlice';
 import auditReducer from '@/features/audit/auditSlice';
 import icd10Reducer from '@/features/icd10/icd10Slice';
 import consentsReducer from '@/features/consents/consentsSlice';
+import roomsReducer from '@/features/rooms/roomsSlice';
+import bedsReducer from '@/features/rooms/bedsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -56,6 +58,8 @@ export const store = configureStore({
     audit: auditReducer,
     icd10: icd10Reducer,
     consents: consentsReducer,
+    rooms: roomsReducer,
+    beds: bedsReducer,
   },
 });
 

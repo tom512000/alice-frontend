@@ -20,6 +20,8 @@ export const ENDPOINTS = {
   COMMENTS: 'comments',
   SERVICES: 'services',
   SPECIALTIES: 'specialties',
+  ROOMS: 'rooms',
+  BEDS: 'beds',
   HOLIDAYS: 'holidays',
   SURGICAL_OPERATIONS: 'surgical_operations',
   TREAT_PEOPLE: 'treat_people',

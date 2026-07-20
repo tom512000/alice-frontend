@@ -149,6 +149,7 @@ export interface StayRead {
   observation: string | null;
   patient: PatientRead;
   service: ServiceRead | null;
+  bed: string | null;
   observations: ObservationRead[];
   createdAt: string;
   updatedAt: string;
@@ -161,6 +162,7 @@ export interface StayWrite {
   observation?: string | null;
   patient: string;
   service?: string | null;
+  bed?: string | null;
 }
 
 export interface ObservationRead {
@@ -396,6 +398,56 @@ export interface ServiceRead {
 
 export interface ServiceWrite {
   serviceName: string;
+}
+
+export interface RoomRead {
+  '@id': string;
+  id: number;
+  name: string;
+  service: ServiceRead | string;
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
+}
+
+export interface RoomWrite {
+  name: string;
+  service: string;
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
+}
+
+export type BedStatus = 'free' | 'reserved' | 'occupied';
+
+export interface BedRoomRef {
+  '@id': string;
+  id: number;
+  name: string;
+}
+
+export interface BedCurrentStay {
+  '@id': string;
+  id: number;
+  startDate: string;
+  endDate: string | null;
+  patient: { '@id': string; id: number; lastname: string; firstname: string };
+}
+
+export interface BedRead {
+  '@id': string;
+  id: number;
+  label: string;
+  room: BedRoomRef | string;
+  status: BedStatus;
+  currentStay?: BedCurrentStay | null;
+}
+
+export interface BedWrite {
+  label: string;
+  room: string;
 }
 
 export interface SpecialtyRead {

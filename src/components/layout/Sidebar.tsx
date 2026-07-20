@@ -7,7 +7,7 @@ import {
   BedDouble, HeartPulse, FlaskConical, ClipboardList, Pill,
   Scissors, Shield, ChevronRight, Hospital, Activity,
   FileText, MessageSquare, ClipboardCheck,
-  FileCheck, ScrollText, Lock,
+  FileCheck, ScrollText, Lock, LayoutGrid,
 } from 'lucide-react';
 
 interface NavItem {
@@ -37,6 +37,7 @@ function buildNav(roles: string[]): NavGroup[] {
       items: [
         { to: '/consultations', icon: <Stethoscope className="h-4 w-4" />, label: 'Consultations' },
         { to: '/stays', icon: <BedDouble className="h-4 w-4" />, label: 'Hospitalisations' },
+        { to: '/beds', icon: <LayoutGrid className="h-4 w-4" />, label: 'Chambres & lits' },
         { to: '/observations', icon: <Activity className="h-4 w-4" />, label: 'Soins infirmiers' },
         { to: '/vital-signs', icon: <HeartPulse className="h-4 w-4" />, label: 'Constantes vitales' },
         { to: '/takes', icon: <ClipboardCheck className="h-4 w-4" />, label: 'Prises de traitement' },
@@ -68,6 +69,7 @@ function buildNav(roles: string[]): NavGroup[] {
       items: [
         { to: '/admin/users', icon: <Users className="h-4 w-4" />, label: 'Utilisateurs', roles: ['ROLE_ADMIN'] },
         { to: '/admin/audit', icon: <ScrollText className="h-4 w-4" />, label: "Journal d'audit", roles: ['ROLE_ADMIN'] },
+        { to: '/admin/room-plan', icon: <LayoutGrid className="h-4 w-4" />, label: 'Plan des chambres', roles: ['ROLE_ADMIN'] },
         { to: '/admin/services', icon: <Hospital className="h-4 w-4" />, label: 'Services' },
         { to: '/admin/medicines', icon: <Pill className="h-4 w-4" />, label: 'Médicaments' },
         { to: '/admin/pathologies', icon: <Shield className="h-4 w-4" />, label: 'Pathologies' },
