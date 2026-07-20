@@ -122,6 +122,46 @@ export const EXAM_TYPE_LABELS: Record<string, string> = {
   other: 'Autre',
 };
 
+export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  prescription: 'Ordonnance',
+  lab_result: 'Résultat de laboratoire',
+  imaging: 'Imagerie',
+  discharge_summary: 'Compte-rendu de sortie',
+  referral: "Courrier d'adressage",
+  consent: 'Consentement',
+  other: 'Autre',
+};
+
+// Identitovigilance : statut d'identité INS du patient.
+export const IDENTITY_STATUS_LABELS: Record<string, string> = {
+  provisional: 'Provisoire',
+  retrieved: 'Récupérée (INSi)',
+  validated: 'Validée',
+  qualified: 'Qualifiée',
+  doubtful: 'Douteuse',
+};
+
+export const CONSENT_TYPE_LABELS: Record<string, string> = {
+  care: 'Soins',
+  data_sharing: 'Partage de données',
+  dmp: 'DMP / Mon espace santé',
+  research: 'Recherche',
+  mssante: 'MSSanté',
+};
+
+export const CONSENT_STATUS_LABELS: Record<string, string> = {
+  granted: 'Accordé',
+  refused: 'Refusé',
+  withdrawn: 'Retiré',
+};
+
+export const AUDIT_ACTION_LABELS: Record<string, string> = {
+  create: 'Création',
+  update: 'Modification',
+  delete: 'Suppression',
+  read: 'Consultation',
+};
+
 export const MEDICAL_HISTORY_TYPE_LABELS: Record<string, string> = {
   medical: 'Médical',
   surgical: 'Chirurgical',

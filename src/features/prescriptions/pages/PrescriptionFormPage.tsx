@@ -14,10 +14,11 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
+import { ConfirmModal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { formatName } from '@/lib/format';
-import { Save, ArrowLeft, Plus, X } from 'lucide-react';
-import type { TreatmentRead } from '@/types/entities';
+import { Save, ArrowLeft, X } from 'lucide-react';
+import type { TreatmentRead, PrescriptionWrite } from '@/types/entities';
 
 const schema = z.object({
   user: z.string().min(1, 'Prescripteur requis'),
@@ -39,6 +40,8 @@ export function PrescriptionFormPage() {
   const users = useAppSelector((s) => s.users.items);
   const allTreatments = useAppSelector((s) => s.treatments.items);
   const [selectedTreatments, setSelectedTreatments] = useState<TreatmentRead[]>([]);
+  const [allergyWarning, setAllergyWarning] = useState<string | null>(null);
+  const [pendingData, setPendingData] = useState<FormData | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -75,12 +78,13 @@ export function PrescriptionFormPage() {
     setSelectedTreatments((prev) => prev.filter((t) => t['@id'] !== iri));
   }
 
-  async function onSubmit(data: FormData) {
-    const payload = {
+  async function submitPrescription(data: FormData, override: boolean) {
+    const payload: PrescriptionWrite = {
       user: data.user,
       consultation: data.consultation,
       number: data.number || null,
       treatments: selectedTreatments.map((t) => t['@id']),
+      overrideAllergyWarning: override,
     };
     const result = isEdit && id
       ? await dispatch(prescriptionsActions.updateOne({ id, data: payload }))
@@ -89,9 +93,29 @@ export function PrescriptionFormPage() {
     if (prescriptionsActions.createOne.fulfilled.match(result) || prescriptionsActions.updateOne.fulfilled.match(result)) {
       toastSuccess(isEdit ? 'Prescription mise à jour.' : 'Prescription créée.');
       navigate('/prescriptions');
+      return;
+    }
+
+    // Alerte allergie croisée renvoyée par le backend (HTTP 422) → proposer la surcharge.
+    const message = typeof result.payload === 'string' ? result.payload : '';
+    if (!override && /allerg/i.test(message)) {
+      setPendingData(data);
+      setAllergyWarning(message);
     } else {
       toastError('Erreur.');
     }
+  }
+
+  async function onSubmit(data: FormData) {
+    await submitPrescription(data, false);
+  }
+
+  async function confirmOverride() {
+    if (!pendingData) return;
+    const data = pendingData;
+    setAllergyWarning(null);
+    setPendingData(null);
+    await submitPrescription(data, true);
   }
 
   const availableTreatments = allTreatments.filter((t) => !selectedTreatments.some((st) => st['@id'] === t['@id']));
@@ -146,6 +170,16 @@ export function PrescriptionFormPage() {
           </div>
         </div>
       </form>
+
+      <ConfirmModal
+        open={!!allergyWarning}
+        onClose={() => { setAllergyWarning(null); setPendingData(null); }}
+        onConfirm={confirmOverride}
+        loading={saving}
+        title="⚠️ Alerte allergie croisée"
+        message={`${allergyWarning ?? ''}\n\nVoulez-vous tout de même valider cette prescription ?`}
+        confirmLabel="Prescrire malgré tout"
+      />
     </div>
   );
 }

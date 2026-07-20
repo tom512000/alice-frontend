@@ -69,6 +69,10 @@ export function AppointmentFormPage() {
       if (patientParam) {
         reset((prev) => ({ ...prev, patient: `/api/patients/${patientParam}` }));
       }
+      const scheduledAtParam = searchParams.get('scheduledAt');
+      if (scheduledAtParam) {
+        reset((prev) => ({ ...prev, scheduledAt: formatDateTimeInput(scheduledAtParam) }));
+      }
     }
   }, [id, isEdit, dispatch, reset, searchParams]);
 

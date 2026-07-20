@@ -15,9 +15,17 @@ export interface UserRead {
   number: string | null;
   specialty: SpecialtyRead | null;
   service: ServiceRead | null;
+  totpEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+export type IdentityStatus =
+  | 'provisional'
+  | 'retrieved'
+  | 'validated'
+  | 'qualified'
+  | 'doubtful';
 
 export interface UserWrite {
   login: string;
@@ -40,6 +48,10 @@ export interface PatientRead {
   gender: 'M' | 'F' | 'O' | null;
   birthdate: string | null;
   nss: string | null;
+  insMatricule: string | null;
+  insOid: string | null;
+  birthPlaceCode: string | null;
+  identityStatus: IdentityStatus;
   bloodType: string | null;
   email: string | null;
   street: string | null;
@@ -50,6 +62,7 @@ export interface PatientRead {
   emergencyContactPhone: string | null;
   treatingDoctor: UserRead | null;
   allergies: AllergyRead[];
+  consents: ConsentRead[];
   consultations: string[];
   stays: string[];
   appointments: string[];
@@ -64,6 +77,10 @@ export interface PatientWrite {
   gender?: 'M' | 'F' | 'O' | null;
   birthdate?: string | null;
   nss?: string | null;
+  insMatricule?: string | null;
+  insOid?: string | null;
+  birthPlaceCode?: string | null;
+  identityStatus?: IdentityStatus;
   bloodType?: string | null;
   email?: string | null;
   street?: string | null;
@@ -345,6 +362,8 @@ export interface PrescriptionWrite {
   consultation: string;
   user: string;
   treatments?: string[];
+  // Confirme la prescription malgré une alerte allergie croisée (surcharge du prescripteur).
+  overrideAllergyWarning?: boolean;
 }
 
 export interface TakeRead {
@@ -449,24 +468,24 @@ export interface DocumentRead {
   '@id': string;
   id: number;
   type: string;
-  title: string;
+  title: string | null;
   patient: PatientRead;
-  uploadedBy: UserRead;
-  uploadedAt: string;
-  originalName: string;
-  mimeType: string;
-  filePath: string;
+  uploadedBy: UserRead | null;
+  uploadedAt: string | null;
+  originalName: string | null;
+  mimeType: string | null;
+  filePath: string | null;
 }
 
 export interface DocumentWrite {
   type: string;
-  title: string;
+  title?: string | null;
   patient: string;
-  uploadedBy: string;
-  uploadedAt: string;
-  originalName: string;
-  mimeType: string;
-  filePath: string;
+  uploadedBy?: string | null;
+  // Contenu du fichier encodé en base64 (data URI acceptée). Décodé côté serveur.
+  base64Content?: string | null;
+  originalName?: string | null;
+  mimeType?: string | null;
 }
 
 export interface CommentRead {
@@ -509,4 +528,51 @@ export interface TreatPersonWrite {
   personNumber?: string | null;
   initialDate: string;
   finalDate?: string | null;
+}
+
+export interface Icd10CodeRead {
+  '@id': string;
+  id: number;
+  code: string;
+  label: string;
+  chapter: string | null;
+}
+
+export interface Icd10CodeWrite {
+  code: string;
+  label: string;
+  chapter?: string | null;
+}
+
+export interface AuditLogRead {
+  '@id': string;
+  id: number;
+  action: 'create' | 'update' | 'delete' | 'read';
+  entityClass: string;
+  entityId: number | null;
+  username: string | null;
+  changes: Record<string, [unknown, unknown]> | null;
+  ipAddress: string | null;
+  createdAt: string;
+}
+
+export type ConsentType = 'care' | 'data_sharing' | 'dmp' | 'research' | 'mssante';
+export type ConsentStatus = 'granted' | 'refused' | 'withdrawn';
+
+export interface ConsentRead {
+  '@id': string;
+  id: number;
+  patient: PatientRead | string;
+  type: ConsentType;
+  status: ConsentStatus;
+  recordedAt: string;
+  notes: string | null;
+}
+
+export interface ConsentWrite {
+  patient: string;
+  type: ConsentType;
+  status: ConsentStatus;
+  recordedAt: string;
+  notes?: string | null;
 }

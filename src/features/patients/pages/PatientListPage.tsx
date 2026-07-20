@@ -8,10 +8,19 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ConfirmModal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
-import { formatDate, formatName, getAge, formatGender } from '@/lib/format';
+import { apiClient } from '@/api/client';
+import { formatDate, formatName, getAge, formatGender, IDENTITY_STATUS_LABELS } from '@/lib/format';
 import { isAdmin, isDoctor } from '@/lib/permissions';
-import { Plus, Eye, Pencil, Trash2, Search } from 'lucide-react';
-import type { PatientRead } from '@/types/entities';
+import { Plus, Eye, Pencil, Trash2, Search, FileJson } from 'lucide-react';
+import type { PatientRead, IdentityStatus } from '@/types/entities';
+
+const IDENTITY_VARIANT: Record<IdentityStatus, 'default' | 'info' | 'warning' | 'success' | 'danger'> = {
+  provisional: 'default',
+  retrieved: 'info',
+  validated: 'warning',
+  qualified: 'success',
+  doubtful: 'danger',
+};
 
 export function PatientListPage() {
   const dispatch = useAppDispatch();
@@ -41,6 +50,22 @@ export function PatientListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, sortKey, sortDir]);
 
+  async function handleExportFhir(patient: PatientRead) {
+    try {
+      const res = await apiClient.get(`/patients/${patient.id}/fhir`);
+      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/fhir+json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `patient-${patient.id}-fhir.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toastSuccess('Export FHIR téléchargé.');
+    } catch {
+      toastError("Échec de l'export FHIR.");
+    }
+  }
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -64,6 +89,15 @@ export function PatientListPage() {
           <p className="font-medium text-gray-900">{formatName(row.lastname, row.firstname)}</p>
           <p className="text-xs text-gray-500">{row.nss ? `NSS ${row.nss}` : '—'}</p>
         </div>
+      ),
+    },
+    {
+      key: 'identityStatus',
+      header: 'Identité',
+      render: (row) => (
+        <Badge variant={IDENTITY_VARIANT[row.identityStatus] ?? 'default'}>
+          {IDENTITY_STATUS_LABELS[row.identityStatus] ?? row.identityStatus}
+        </Badge>
       ),
     },
     {
@@ -154,6 +188,13 @@ export function PatientListPage() {
               variant="ghost"
               onClick={() => navigate(`/patients/${row.id}`)}
               icon={<Eye className="h-4 w-4" />}
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              title="Exporter au format FHIR"
+              onClick={() => handleExportFhir(row)}
+              icon={<FileJson className="h-4 w-4" />}
             />
             {canWrite && (
               <Button

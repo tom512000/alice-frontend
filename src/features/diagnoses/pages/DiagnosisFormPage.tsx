@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { diagnosesActions } from '../diagnosesSlice';
 import { patientsActions } from '@/features/patients/patientsSlice';
 import { usersActions } from '@/features/users/usersSlice';
+import { icd10Actions } from '@/features/icd10/icd10Slice';
 import { PageHeader } from '@/components/layout/Layout';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -46,15 +47,19 @@ export function DiagnosisFormPage() {
   const { saving, error } = useAppSelector((s) => s.diagnoses);
   const patients = useAppSelector((s) => s.patients.items);
   const users = useAppSelector((s) => s.users.items);
+  const icd10Codes = useAppSelector((s) => s.icd10.items);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { type: 'principal', certainty: 'confirmed' },
   });
 
+  const icd10Reg = register('icd10Code');
+
   useEffect(() => {
     dispatch(patientsActions.fetchList({ page: 1, itemsPerPage: 100 }));
     dispatch(usersActions.fetchList({ page: 1, itemsPerPage: 100 }));
+    dispatch(icd10Actions.fetchList({ page: 1, itemsPerPage: 200, order: { code: 'asc' } }));
     if (isEdit && id) {
       dispatch(diagnosesActions.fetchOne(id)).then((res) => {
         if (diagnosesActions.fetchOne.fulfilled.match(res)) {
@@ -117,7 +122,20 @@ export function DiagnosisFormPage() {
                 </FormGrid>
                 <FormGrid cols={2}>
                   <Input label="Date *" type="datetime-local" {...register('diagnosedAt')} error={errors.diagnosedAt?.message} />
-                  <Input label="Code CIM-10" {...register('icd10Code')} placeholder="Ex: J18.9" />
+                  <Select
+                    label="Code CIM-10"
+                    {...icd10Reg}
+                    onChange={(e) => {
+                      icd10Reg.onChange(e);
+                      const match = icd10Codes.find((c) => c.code === e.target.value);
+                      if (match) setValue('label', match.label);
+                    }}
+                    options={[
+                      { value: '', label: '— Aucun —' },
+                      ...icd10Codes.map((c) => ({ value: c.code, label: `${c.code} — ${c.label}` })),
+                    ]}
+                    error={errors.icd10Code?.message}
+                  />
                 </FormGrid>
                 <Input label="Libellé du diagnostic *" {...register('label')} error={errors.label?.message} />
                 <FormGrid cols={2}>

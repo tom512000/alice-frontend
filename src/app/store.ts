@@ -20,6 +20,12 @@ import specialtiesReducer from '@/features/specialties/specialtiesSlice';
 import holidaysReducer from '@/features/holidays/holidaysSlice';
 import surgicalOperationsReducer from '@/features/surgicalOperations/surgicalOperationsSlice';
 import treatPeopleReducer from '@/features/treatPeople/treatPeopleSlice';
+import takesReducer from '@/features/takes/takesSlice';
+import commentsReducer from '@/features/comments/commentsSlice';
+import documentsReducer from '@/features/documents/documentsSlice';
+import auditReducer from '@/features/audit/auditSlice';
+import icd10Reducer from '@/features/icd10/icd10Slice';
+import consentsReducer from '@/features/consents/consentsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -44,6 +50,12 @@ export const store = configureStore({
     holidays: holidaysReducer,
     surgicalOperations: surgicalOperationsReducer,
     treatPeople: treatPeopleReducer,
+    takes: takesReducer,
+    comments: commentsReducer,
+    documents: documentsReducer,
+    audit: auditReducer,
+    icd10: icd10Reducer,
+    consents: consentsReducer,
   },
 });
 
