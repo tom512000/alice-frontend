@@ -28,6 +28,7 @@ export const ENDPOINTS = {
   ICD10_CODES: 'icd10_codes',
   AUDIT_LOGS: 'audit_logs',
   CONSENTS: 'consents',
+  DASHBOARD_STATS: 'dashboard/stats',
 } as const;
 
 export type EndpointKey = keyof typeof ENDPOINTS;

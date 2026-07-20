@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
-import { apiClient, buildParams } from '@/api/client';
+import { apiClient, buildParams, extractMembers } from '@/api/client';
 import { ENDPOINTS } from '@/api/endpoints';
 import { PageHeader } from '@/components/layout/Layout';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge, AppointmentStatusBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { formatDate, formatDateTime, formatName } from '@/lib/format';
+import { formatDate, formatDateTime, formatName, formatGender, DIAGNOSIS_TYPE_LABELS, SURGICAL_STATUS_LABELS, CONSENT_STATUS_LABELS, AUDIT_ACTION_LABELS } from '@/lib/format';
 import {
   UserSquare2, Calendar, BedDouble, FlaskConical, Scissors,
-  Plus, ChevronRight, Activity,
+  Plus, ChevronRight, Activity, DoorOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import type { PatientRead, AppointmentRead, StayRead, MedicalExamRead, SurgicalOperationRead } from '@/types/entities';
+import type { PatientRead, AppointmentRead } from '@/types/entities';
+import { getDashboardStats, type DashboardStats } from '@/features/dashboard/dashboardApi';
+import { CategoryBarChart } from '@/features/dashboard/charts/CategoryBarChart';
+import { GroupedBarChart } from '@/features/dashboard/charts/GroupedBarChart';
+import { TrendLineChart } from '@/features/dashboard/charts/TrendLineChart';
+import { RankingBarChart } from '@/features/dashboard/charts/RankingBarChart';
+import {
+  BED_STATUS, BED_STATUS_LABELS, DIAGNOSIS_TYPE_COLORS, GENDER_COLORS,
+  AUDIT_ACTION_COLORS, SURGICAL_STATUS_COLORS, CONSENT_STATUS_COLORS,
+} from '@/features/dashboard/chartPalette';
 
-interface DashboardStats {
+interface Stats {
   patients: number;
   todayAppointments: number;
   activeStays: number;
@@ -49,13 +58,32 @@ function KpiCard({ icon, label, value, loading, color = 'text-gray-900' }: KpiCa
   );
 }
 
+function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        {subtitle && <p className="mt-0.5 text-xs font-poppins text-gray-500">{subtitle}</p>}
+      </CardHeader>
+      <CardBody>{children}</CardBody>
+    </Card>
+  );
+}
+
+function formatShortDate(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+}
+
 export function Dashboard() {
   const user = useAppSelector((s) => s.auth.user);
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [recentPatients, setRecentPatients] = useState<PatientRead[]>([]);
   const [todayAppts, setTodayAppts] = useState<AppointmentRead[]>([]);
+  const [dashStats, setDashStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -70,16 +98,19 @@ export function Dashboard() {
           apiClient.get(`/${ENDPOINTS.SURGICAL_OPERATIONS}`, { params: buildParams({ page: 1, itemsPerPage: 1, status: 'scheduled' }) }),
         ]);
 
+        const patients = extractMembers<PatientRead>(patientsRes.data);
+        const appts = extractMembers<AppointmentRead>(apptsRes.data);
+
         setStats({
-          patients: patientsRes.data['hydra:totalItems'],
-          todayAppointments: apptsRes.data['hydra:totalItems'],
-          activeStays: staysRes.data['hydra:totalItems'],
-          pendingExams: examsRes.data['hydra:totalItems'],
-          scheduledOps: opsRes.data['hydra:totalItems'],
+          patients: patients.totalItems,
+          todayAppointments: appts.totalItems,
+          activeStays: extractMembers(staysRes.data).totalItems,
+          pendingExams: extractMembers(examsRes.data).totalItems,
+          scheduledOps: extractMembers(opsRes.data).totalItems,
         });
 
-        setRecentPatients(patientsRes.data['hydra:member'].slice(0, 5));
-        setTodayAppts(apptsRes.data['hydra:member'].slice(0, 6));
+        setRecentPatients(patients.items.slice(0, 5));
+        setTodayAppts(appts.items.slice(0, 6));
       } catch {
         // silently fail - network may be down
       } finally {
@@ -89,9 +120,26 @@ export function Dashboard() {
     load();
   }, []);
 
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        setDashStats(await getDashboardStats());
+      } catch {
+        // silently fail - le reste du dashboard reste utilisable
+      } finally {
+        setStatsLoading(false);
+      }
+    }
+    loadStats();
+  }, []);
+
   const roles = user?.roles ?? [];
   const isAdmin = roles.includes('ROLE_ADMIN');
   const isDoctor = roles.includes('ROLE_DOCTOR');
+
+  const bedOccupancyRate = dashStats && dashStats.kpis.bedsTotal > 0
+    ? Math.round(((dashStats.kpis.bedsTotal - dashStats.kpis.bedsFree) / dashStats.kpis.bedsTotal) * 100)
+    : 0;
 
   return (
     <div>
@@ -108,12 +156,97 @@ export function Dashboard() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         <KpiCard icon={<UserSquare2 className="h-5 w-5" />} label="Patients" value={stats?.patients ?? 0} loading={loading} />
-        <KpiCard icon={<Calendar className="h-5 w-5" />} label="RDV aujourd'hui" value={stats?.todayAppointments ?? 0} loading={loading} color="text-blue-700" />
-        <KpiCard icon={<BedDouble className="h-5 w-5" />} label="Séjours actifs" value={stats?.activeStays ?? 0} loading={loading} color="text-amber-700" />
+        <KpiCard icon={<BedDouble className="h-5 w-5" />} label="Hospitalisés" value={dashStats?.kpis.patientsHospitalizedNow ?? 0} loading={statsLoading} color="text-amber-700" />
+        <KpiCard icon={<Calendar className="h-5 w-5" />} label="RDV aujourd'hui" value={dashStats?.kpis.appointmentsToday ?? 0} loading={statsLoading} color="text-blue-700" />
+        <KpiCard
+          icon={<DoorOpen className="h-5 w-5" />}
+          label="Occupation lits"
+          value={dashStats ? `${bedOccupancyRate}%` : '—'}
+          loading={statsLoading}
+          color="text-emerald-700"
+        />
         <KpiCard icon={<FlaskConical className="h-5 w-5" />} label="Examens" value={stats?.pendingExams ?? 0} loading={loading} />
-        <KpiCard icon={<Scissors className="h-5 w-5" />} label="Opérations prévues" value={stats?.scheduledOps ?? 0} loading={loading} color="text-red-700" />
+        <KpiCard icon={<Scissors className="h-5 w-5" />} label="Opérations prévues" value={dashStats?.kpis.upcomingOperations ?? stats?.scheduledOps ?? 0} loading={loading || statsLoading} color="text-red-700" />
+      </div>
+
+      {/* Graphiques */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <ChartCard title="Occupation des lits" subtitle={`${dashStats?.kpis.bedsTotal ?? 0} lits au total`}>
+          <CategoryBarChart
+            data={dashStats?.bedOccupancy ?? []}
+            labelMap={BED_STATUS_LABELS}
+            colorFor={(label) => BED_STATUS[label] ?? '#9ca3af'}
+          />
+        </ChartCard>
+
+        <ChartCard title="Rendez-vous des 14 prochains jours">
+          <TrendLineChart data={dashStats?.appointmentsNext14Days ?? []} xTickFormatter={formatShortDate} />
+        </ChartCard>
+
+        <ChartCard title="Mouvements des séjours" subtitle="14 derniers jours — admissions vs sorties">
+          <GroupedBarChart
+            data={dashStats?.stayMovementsLast14Days ?? []}
+            xKey="date"
+            xTickFormatter={formatShortDate}
+            series={[
+              { key: 'admissions', name: 'Admissions', color: '#2a78d6' },
+              { key: 'discharges', name: 'Sorties', color: '#008300' },
+            ]}
+          />
+        </ChartCard>
+
+        <ChartCard title="Top 5 des diagnostics (CIM-10)" subtitle="Par nombre d'occurrences">
+          <RankingBarChart data={dashStats?.topIcd10 ?? []} height={220} />
+        </ChartCard>
+
+        <ChartCard title="Diagnostics par type">
+          <CategoryBarChart
+            data={dashStats?.diagnosesByType ?? []}
+            labelMap={DIAGNOSIS_TYPE_LABELS}
+            colorFor={(label) => DIAGNOSIS_TYPE_COLORS[label] ?? '#2a78d6'}
+            height={220}
+          />
+        </ChartCard>
+
+        <ChartCard title="Patients par genre">
+          <CategoryBarChart
+            data={dashStats?.patientsByGender ?? []}
+            labelMap={{ M: formatGender('M'), F: formatGender('F'), O: formatGender('O') }}
+            colorFor={(label) => GENDER_COLORS[label] ?? '#2a78d6'}
+            height={220}
+          />
+        </ChartCard>
+
+        <ChartCard title="Bloc opératoire par statut">
+          <CategoryBarChart
+            data={dashStats?.surgicalOperationsByStatus ?? []}
+            labelMap={SURGICAL_STATUS_LABELS}
+            colorFor={(label) => SURGICAL_STATUS_COLORS[label] ?? '#2a78d6'}
+            height={220}
+          />
+        </ChartCard>
+
+        <ChartCard title="Consentements RGPD par statut">
+          <CategoryBarChart
+            data={dashStats?.consentsByStatus ?? []}
+            labelMap={CONSENT_STATUS_LABELS}
+            colorFor={(label) => CONSENT_STATUS_COLORS[label] ?? '#2a78d6'}
+            height={220}
+          />
+        </ChartCard>
+
+        {isAdmin && dashStats?.auditActionsLast7Days && (
+          <ChartCard title="Activité (journal d'audit)" subtitle="7 derniers jours, toutes actions confondues">
+            <CategoryBarChart
+              data={dashStats.auditActionsLast7Days}
+              labelMap={AUDIT_ACTION_LABELS}
+              colorFor={(label) => AUDIT_ACTION_COLORS[label] ?? '#2a78d6'}
+              height={220}
+            />
+          </ChartCard>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
