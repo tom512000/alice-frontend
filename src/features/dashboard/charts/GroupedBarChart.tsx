@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AXIS_LINE, AXIS_TICK, ChartTooltipContent, EmptyChartState, SimpleLegend } from './shared';
+import { AXIS_LINE, AXIS_TICK } from './chartStyles';
+import { ChartTooltipContent, EmptyChartState, SimpleLegend } from './shared';
 
 interface Series {
   key: string;

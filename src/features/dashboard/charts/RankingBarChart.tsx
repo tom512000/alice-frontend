@@ -1,6 +1,7 @@
 import { Bar, BarChart, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { SEQUENTIAL_BLUE } from '../chartPalette';
-import { AXIS_TICK, ChartTooltipContent, EmptyChartState, LABEL_STYLE } from './shared';
+import { AXIS_TICK, LABEL_STYLE } from './chartStyles';
+import { ChartTooltipContent, EmptyChartState } from './shared';
 
 interface RankingBarChartProps {
   data: { label: string; count: number }[];

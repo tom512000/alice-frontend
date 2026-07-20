@@ -1,6 +1,7 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { SEQUENTIAL_BLUE } from '../chartPalette';
-import { AXIS_LINE, AXIS_TICK, ChartTooltipContent, EmptyChartState } from './shared';
+import { AXIS_LINE, AXIS_TICK } from './chartStyles';
+import { ChartTooltipContent, EmptyChartState } from './shared';
 
 interface TrendLineChartProps {
   data: { date: string; count: number }[];
