@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +16,8 @@ import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
 import { useToast } from '@/components/ui/Toast';
 import { formatName, formatDateTimeInput } from '@/lib/format';
-import { Save, ArrowLeft } from 'lucide-react';
+import { RoomPickerModal } from '@/features/rooms/components/RoomPickerModal';
+import { Save, ArrowLeft, LayoutGrid } from 'lucide-react';
 
 const schema = z.object({
   patient: z.string().min(1, 'Patient requis'),
@@ -51,7 +52,9 @@ export function SurgicalOperationFormPage() {
   const users = useAppSelector((s) => s.users.items);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) as any, defaultValues: { status: 'scheduled' } });
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) as any, defaultValues: { status: 'scheduled' } });
+
+  const [roomPickerOpen, setRoomPickerOpen] = useState(false);
 
   useEffect(() => {
     dispatch(patientsActions.fetchList({ page: 1, itemsPerPage: 100 }));
@@ -138,7 +141,14 @@ export function SurgicalOperationFormPage() {
                 </FormGrid>
                 <FormGrid cols={3}>
                   <Select label="Statut" {...register('status')} options={[{ value: 'scheduled', label: 'Planifiée' }, { value: 'performed', label: 'Réalisée' }, { value: 'cancelled', label: 'Annulée' }, { value: 'postponed', label: 'Reportée' }]} />
-                  <Input label="Salle d'opération" {...register('operatingRoom')} />
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Input label="Salle d'opération" {...register('operatingRoom')} placeholder="Ex : Bloc A - Salle 2" />
+                    </div>
+                    <Button type="button" variant="outline" onClick={() => setRoomPickerOpen(true)} icon={<LayoutGrid className="h-4 w-4" />}>
+                      Plan
+                    </Button>
+                  </div>
                   <Input label="Code CCAM" {...register('ccamCode')} />
                 </FormGrid>
                 <Select label="Anesthésie" {...register('anesthesiaType')} options={[{ value: '', label: '— Aucune —' }, ...ANESTHESIA_TYPES.map((t) => ({ value: t, label: t }))]} />
@@ -160,6 +170,15 @@ export function SurgicalOperationFormPage() {
           </div>
         </div>
       </form>
+
+      <RoomPickerModal
+        open={roomPickerOpen}
+        onClose={() => setRoomPickerOpen(false)}
+        onSelect={(room) => setValue('operatingRoom', room.name, { shouldDirty: true, shouldValidate: true })}
+        title="Choisir la salle d'opération"
+        currentValue={watch('operatingRoom')}
+        preferBloc
+      />
     </div>
   );
 }

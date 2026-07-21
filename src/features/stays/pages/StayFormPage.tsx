@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +16,8 @@ import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
 import { useToast } from '@/components/ui/Toast';
 import { formatName, formatDateInput } from '@/lib/format';
-import { Save, ArrowLeft } from 'lucide-react';
+import { RoomPickerModal } from '@/features/rooms/components/RoomPickerModal';
+import { Save, ArrowLeft, LayoutGrid } from 'lucide-react';
 
 const schema = z.object({
   patient: z.string().min(1, 'Patient requis'),
@@ -40,7 +41,9 @@ export function StayFormPage() {
   const patients = useAppSelector((s) => s.patients.items);
   const services = useAppSelector((s) => s.services.items);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const [roomPickerOpen, setRoomPickerOpen] = useState(false);
 
   useEffect(() => {
     dispatch(patientsActions.fetchList({ page: 1, itemsPerPage: 100 }));
@@ -107,7 +110,14 @@ export function StayFormPage() {
                   <Input label="Date de sortie" type="date" {...register('endDate')} />
                 </FormGrid>
                 <FormGrid cols={2}>
-                  <Input label="Chambre" {...register('room')} placeholder="Ex: 302" />
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Input label="Chambre" {...register('room')} placeholder="Ex: 302" />
+                    </div>
+                    <Button type="button" variant="outline" onClick={() => setRoomPickerOpen(true)} icon={<LayoutGrid className="h-4 w-4" />}>
+                      Plan
+                    </Button>
+                  </div>
                   <Select label="Service" {...register('service')} options={[{ value: '', label: '—' }, ...services.map((s) => ({ value: s['@id'], label: s.serviceName }))]} />
                 </FormGrid>
                 <Textarea label="Observation générale" {...register('observation')} rows={3} />
@@ -122,6 +132,20 @@ export function StayFormPage() {
           </div>
         </div>
       </form>
+
+      <RoomPickerModal
+        open={roomPickerOpen}
+        onClose={() => setRoomPickerOpen(false)}
+        onSelect={(room) => {
+          setValue('room', room.name, { shouldDirty: true, shouldValidate: true });
+          // Une salle appartient à un service : on aligne le champ Service dessus.
+          const svcIri = typeof room.service === 'string' ? room.service : room.service?.['@id'];
+          if (svcIri) setValue('service', svcIri, { shouldDirty: true });
+        }}
+        title="Choisir la chambre"
+        currentValue={watch('room')}
+        defaultServiceId={watch('service')}
+      />
     </div>
   );
 }
