@@ -75,6 +75,15 @@ export interface PatientRead {
   updatedAt: string;
 }
 
+/** Résultat allégé de la recherche patient globale (/api/patient-search) — distinct de PatientRead. */
+export interface PatientSearchResult {
+  id: number;
+  firstname: string;
+  lastname: string;
+  birthdate: string | null;
+  nss: string | null;
+}
+
 export interface PatientWrite {
   lastname: string;
   firstname: string;

@@ -31,6 +31,7 @@ export const ENDPOINTS = {
   DASHBOARD_STATS: 'dashboard/stats',
   AI_ICD10_SUGGEST: 'ai/icd10-suggest',
   STAFF_DIRECTORY: 'staff/directory',
+  PATIENT_SEARCH: 'patient-search',
   MONITORING_VITALS: 'monitoring/vitals',
   MONITORING_HISTORY: 'monitoring/history',
 } as const;
