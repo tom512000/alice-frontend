@@ -47,6 +47,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.1",
     "@types/qrcode": "^1.5.6",
