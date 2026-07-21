@@ -28,6 +28,7 @@ import icd10Reducer from '@/features/icd10/icd10Slice';
 import consentsReducer from '@/features/consents/consentsSlice';
 import roomsReducer from '@/features/rooms/roomsSlice';
 import bedsReducer from '@/features/rooms/bedsSlice';
+import monitoringReducer from '@/features/monitoring/monitoringSlice';
 
 export const store = configureStore({
   reducer: {
@@ -60,6 +61,7 @@ export const store = configureStore({
     consents: consentsReducer,
     rooms: roomsReducer,
     beds: bedsReducer,
+    monitoring: monitoringReducer,
   },
 });
 

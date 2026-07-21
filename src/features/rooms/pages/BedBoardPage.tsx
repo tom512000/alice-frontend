@@ -13,7 +13,10 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { formatName, formatDate } from '@/lib/format';
+import { cn } from '@/lib/cn';
 import { canWrite, canWriteNursing } from '@/lib/permissions';
+import { fetchVitals, type VitalSeverity } from '@/features/monitoring/monitoringSlice';
+import { BedVitalsPanel } from '@/features/monitoring/BedVitalsPanel';
 import { BedDouble } from 'lucide-react';
 import type { BedRead, BedStatus } from '@/types/entities';
 
@@ -36,6 +39,7 @@ export function BedBoardPage() {
   const services = useAppSelector((s) => s.services.items);
   const rooms = useAppSelector((s) => s.rooms.items);
   const beds = useAppSelector((s) => s.beds.items) as BedRead[];
+  const monitoring = useAppSelector((s) => s.monitoring.entries);
 
   const [serviceId, setServiceId] = useState('');
   const [selectedBed, setSelectedBed] = useState<BedRead | null>(null);
@@ -47,7 +51,14 @@ export function BedBoardPage() {
   useEffect(() => {
     dispatch(servicesActions.fetchList({ page: 1, itemsPerPage: 100 }));
     dispatch(patientsActions.fetchList({ page: 1, itemsPerPage: 100 }));
+    dispatch(fetchVitals());
   }, [dispatch]);
+
+  const severityByBed = useMemo(() => {
+    const m = new Map<number, VitalSeverity>();
+    for (const e of monitoring) m.set(e.bedId, e.severity);
+    return m;
+  }, [monitoring]);
 
   function loadBoard() {
     if (!effectiveServiceId) return;
@@ -119,22 +130,30 @@ export function BedBoardPage() {
               {room.name}
             </div>
             <div className="flex flex-wrap gap-1 overflow-auto p-2" style={{ maxHeight: room.height - 32 }}>
-              {(bedsByRoom.get(room['@id']) ?? []).map((bed) => (
-                <button
-                  key={bed.id}
-                  type="button"
-                  onClick={() => setSelectedBed(bed)}
-                  title={
-                    bed.currentStay
-                      ? `${formatName(bed.currentStay.patient.lastname, bed.currentStay.patient.firstname)} — depuis ${formatDate(bed.currentStay.startDate)}`
-                      : 'Libre'
-                  }
-                  className={`flex h-9 w-9 flex-col items-center justify-center rounded border text-[10px] font-poppins transition-colors ${STATUS_STYLES[bed.status]}`}
-                >
-                  <BedDouble className="h-3.5 w-3.5" />
-                  {bed.label}
-                </button>
-              ))}
+              {(bedsByRoom.get(room['@id']) ?? []).map((bed) => {
+                const sev = severityByBed.get(bed.id);
+                return (
+                  <button
+                    key={bed.id}
+                    type="button"
+                    onClick={() => setSelectedBed(bed)}
+                    title={
+                      bed.currentStay
+                        ? `${formatName(bed.currentStay.patient.lastname, bed.currentStay.patient.firstname)} — depuis ${formatDate(bed.currentStay.startDate)}`
+                        : 'Libre'
+                    }
+                    className={cn(
+                      'flex h-9 w-9 flex-col items-center justify-center rounded border text-[10px] font-poppins transition-colors',
+                      STATUS_STYLES[bed.status],
+                      sev === 'critical' && 'ring-2 ring-red-500 ring-offset-1 animate-pulse',
+                      sev === 'warning' && 'ring-2 ring-amber-400'
+                    )}
+                  >
+                    <BedDouble className="h-3.5 w-3.5" />
+                    {bed.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
@@ -280,6 +299,8 @@ function BedActionModal({ bed, serviceId, canAct, canCancelReservation, onClose,
             <br />
             {bed.status === 'occupied' ? 'Depuis' : 'Prévu le'} {formatDate(bed.currentStay.startDate)}
           </p>
+
+          {bed.status === 'occupied' && <BedVitalsPanel bedId={bed.id} />}
           {canAct && (
             <div className="flex flex-wrap justify-end gap-2 pt-1">
               {bed.status === 'reserved' && canCancelReservation && (
