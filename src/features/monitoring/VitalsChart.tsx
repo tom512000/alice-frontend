@@ -115,7 +115,7 @@ export function VitalsChart({ bedId, minutes = 30, compact = false, metric }: Vi
           {!compact && (
             <Tooltip
               labelFormatter={(v) => format(new Date(Number(v)), 'HH:mm:ss')}
-              formatter={(val: number, name: string) => [`${val} ${def.unit}`, name]}
+              formatter={(val, name) => [`${val} ${def.unit}`, name]}
               contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
             />
           )}
