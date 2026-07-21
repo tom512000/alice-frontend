@@ -12,6 +12,10 @@ default:
 commit-lint:
   stage: commit-lint
   image: node:20-alpine
+  before_script:
+    # commitlint --last shelle vers `git log` en interne pour lire le message
+    # du dernier commit - absent par défaut de l'image alpine.
+    - apk add --no-cache git
   script:
     - npm ci
     - npx commitlint --last --verbose
