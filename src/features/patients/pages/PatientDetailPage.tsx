@@ -21,9 +21,9 @@ import { PatientExamsTab } from '../components/PatientExamsTab';
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between py-2 border-b border-gray-50 last:border-0">
-      <span className="text-xs text-gray-500 font-poppins shrink-0 w-36">{label}</span>
-      <span className="text-sm text-gray-800 font-poppins text-right">{value ?? '—'}</span>
+    <div className="py-2 border-b border-gray-50 last:border-0">
+      <p className="text-xs text-gray-500 font-poppins">{label}</p>
+      <p className="mt-0.5 break-words text-sm text-gray-800 font-poppins">{value ?? '—'}</p>
     </div>
   );
 }

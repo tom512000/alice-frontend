@@ -14,9 +14,9 @@ import type { MedicineRead, TreatmentRead } from '@/types/entities';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="flex gap-4 py-2 border-b border-gray-100 last:border-0">
-      <span className="text-xs text-gray-500 w-32 shrink-0 pt-0.5">{label}</span>
-      <span className="text-sm">{value ?? '—'}</span>
+    <div className="py-2 border-b border-gray-100 last:border-0">
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="mt-0.5 break-words text-sm">{value ?? '—'}</p>
     </div>
   );
 }
