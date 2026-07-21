@@ -42,15 +42,15 @@ interface KpiCardProps {
 
 function KpiCard({ icon, label, value, loading, color = 'text-gray-900' }: KpiCardProps) {
   return (
-    <Card>
-      <CardBody className="flex items-center gap-4">
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600 shrink-0">{icon}</div>
-        <div>
-          <p className="font-poppins text-xs text-gray-500">{label}</p>
+    <Card className="h-full">
+      <CardBody className="flex h-full items-center gap-3 p-4 sm:gap-4 sm:p-5">
+        <div className="rounded-lg bg-gray-100 p-2.5 text-gray-600 shrink-0 sm:p-3">{icon}</div>
+        <div className="min-w-0 flex-1">
+          <p className="font-poppins text-xs text-gray-500 truncate" title={label}>{label}</p>
           {loading ? (
             <Skeleton className="h-7 w-16 mt-1" />
           ) : (
-            <p className={`font-lexend text-2xl font-bold ${color}`}>{value}</p>
+            <p className={`font-lexend text-xl font-bold truncate sm:text-2xl ${color}`}>{value}</p>
           )}
         </div>
       </CardBody>
@@ -156,7 +156,7 @@ export function Dashboard() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
         <KpiCard icon={<UserSquare2 className="h-5 w-5" />} label="Patients" value={stats?.patients ?? 0} loading={loading} />
         <KpiCard icon={<BedDouble className="h-5 w-5" />} label="Hospitalisés" value={dashStats?.kpis.patientsHospitalizedNow ?? 0} loading={statsLoading} color="text-amber-700" />
         <KpiCard icon={<Calendar className="h-5 w-5" />} label="RDV aujourd'hui" value={dashStats?.kpis.appointmentsToday ?? 0} loading={statsLoading} color="text-blue-700" />
@@ -172,7 +172,7 @@ export function Dashboard() {
       </div>
 
       {/* Graphiques */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+      <div className="grid grid-cols-1 gap-4 mb-5 lg:grid-cols-2 lg:gap-5">
         <ChartCard title="Occupation des lits" subtitle={`${dashStats?.kpis.bedsTotal ?? 0} lits au total`}>
           <CategoryBarChart
             data={dashStats?.bedOccupancy ?? []}
@@ -249,7 +249,7 @@ export function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
         {/* Rendez-vous du jour */}
         <Card>
           <CardHeader>

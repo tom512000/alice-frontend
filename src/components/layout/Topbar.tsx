@@ -1,7 +1,7 @@
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, ChevronRight } from 'lucide-react';
+import { LogOut, User, ChevronRight, Menu } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -52,7 +52,7 @@ function Breadcrumbs() {
   );
 }
 
-export function Topbar({ sidebarWidth }: { sidebarWidth: number }) {
+export function Topbar({ sidebarWidth, onMenuClick }: { sidebarWidth: number; onMenuClick: () => void }) {
   const user = useAppSelector((s) => s.auth.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -64,12 +64,21 @@ export function Topbar({ sidebarWidth }: { sidebarWidth: number }) {
 
   return (
     <header
-      className="fixed top-0 right-0 z-20 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-5 transition-all duration-200"
-      style={{ left: sidebarWidth }}
+      className="fixed top-0 right-0 left-0 z-20 h-14 bg-white border-b border-gray-200 flex items-center justify-between gap-3 px-3 sm:px-5 transition-all duration-200 lg:left-[var(--sidebar-w)]"
+      style={{ '--sidebar-w': `${sidebarWidth}px` } as React.CSSProperties}
     >
-      <Breadcrumbs />
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          onClick={onMenuClick}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 lg:hidden"
+          aria-label="Ouvrir le menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <Breadcrumbs />
+      </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <div className="flex items-center gap-2 text-sm font-poppins text-gray-700">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-600">
             <User className="h-4 w-4" />

@@ -7,7 +7,7 @@ import {
   BedDouble, HeartPulse, FlaskConical, ClipboardList, Pill,
   Scissors, Shield, ChevronRight, Hospital, Activity,
   FileText, MessageSquare, ClipboardCheck,
-  FileCheck, ScrollText, Lock, LayoutGrid,
+  FileCheck, ScrollText, Lock, LayoutGrid, X,
 } from 'lucide-react';
 
 interface NavItem {
@@ -81,7 +81,14 @@ function buildNav(roles: string[]): NavGroup[] {
   return groups;
 }
 
-export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
   const user = useAppSelector((s) => s.auth.user);
   const roles = user?.roles ?? [];
 
@@ -90,8 +97,10 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-30 h-full bg-gray-950 text-white flex flex-col transition-all duration-200',
-        collapsed ? 'w-14' : 'w-56'
+        'fixed left-0 top-0 z-40 h-full bg-gray-950 text-white flex flex-col',
+        'w-64 transition-transform duration-200 lg:w-auto lg:transition-[width] lg:translate-x-0',
+        mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        collapsed ? 'lg:w-14' : 'lg:w-56'
       )}
     >
       {/* Logo */}
@@ -99,20 +108,25 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/10">
           <Activity className="h-4 w-4 text-white" />
         </div>
-        {!collapsed && (
-          <span className="font-lexend font-semibold text-base text-white tracking-tight">Alice DPI</span>
-        )}
+        <span className={cn('font-lexend font-semibold text-base text-white tracking-tight flex-1', collapsed && 'lg:hidden')}>
+          Alice DPI
+        </span>
+        <button
+          onClick={onMobileClose}
+          className="ml-auto flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-white/10 hover:text-white lg:hidden"
+          aria-label="Fermer le menu"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-5">
         {groups.map((group) => (
           <div key={group.label}>
-            {!collapsed && (
-              <p className="px-2 mb-1.5 text-[10px] font-lexend font-semibold uppercase tracking-widest text-gray-500">
-                {group.label}
-              </p>
-            )}
+            <p className={cn('px-2 mb-1.5 text-[10px] font-lexend font-semibold uppercase tracking-widest text-gray-500', collapsed && 'lg:hidden')}>
+              {group.label}
+            </p>
             <div className="space-y-0.5">
               {group.items.map((item) => (
                 <NavLink
@@ -130,7 +144,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
                   title={collapsed ? item.label : undefined}
                 >
                   <span className="shrink-0">{item.icon}</span>
-                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  <span className={cn('truncate', collapsed && 'lg:hidden')}>{item.label}</span>
                 </NavLink>
               ))}
             </div>
@@ -138,10 +152,10 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
         ))}
       </nav>
 
-      {/* Toggle */}
+      {/* Toggle (collapse desktop uniquement — sur mobile le drawer est toujours en pleine largeur) */}
       <button
         onClick={onToggle}
-        className="flex items-center justify-center h-10 border-t border-gray-800 text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors"
+        className="hidden items-center justify-center h-10 border-t border-gray-800 text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors lg:flex"
       >
         <ChevronRight className={cn('h-4 w-4 transition-transform', !collapsed && 'rotate-180')} />
       </button>
