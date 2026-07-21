@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { MonitoringAlerts } from '@/features/monitoring/MonitoringAlerts';
 
 interface LayoutProps {
   children: ReactNode;
@@ -43,6 +44,7 @@ export function Layout({ children }: LayoutProps) {
       <Topbar sidebarWidth={sidebarWidth} onMenuClick={() => setMobileOpen(true)} />
 
       <main className="min-h-screen pt-14 transition-all duration-200 lg:ml-[var(--sidebar-w)]">
+        <MonitoringAlerts />
         <div className="p-4 sm:p-6 max-w-[1400px] mx-auto lg:mx-0">
           {children}
         </div>
