@@ -187,7 +187,7 @@ export function Dashboard() {
 
         <ChartCard title="Mouvements des séjours" subtitle="14 derniers jours — admissions vs sorties">
           <GroupedBarChart
-            data={dashStats?.stayMovementsLast14Days ?? []}
+            data={(dashStats?.stayMovementsLast14Days ?? []) as unknown as Record<string, string | number>[]}
             xKey="date"
             xTickFormatter={formatShortDate}
             series={[

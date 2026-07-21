@@ -15,7 +15,7 @@ import { useToast } from '@/components/ui/Toast';
 import { formatName, formatDate } from '@/lib/format';
 import { canWrite, canWriteNursing } from '@/lib/permissions';
 import { BedDouble } from 'lucide-react';
-import type { BedRead } from '@/types/entities';
+import type { BedRead, BedStatus } from '@/types/entities';
 
 const STATUS_STYLES: Record<string, string> = {
   free: 'border-gray-300 bg-white text-gray-500 hover:border-gray-400',
@@ -35,7 +35,7 @@ export function BedBoardPage() {
   const canAct = canWriteNursing(roles);
   const services = useAppSelector((s) => s.services.items);
   const rooms = useAppSelector((s) => s.rooms.items);
-  const beds = useAppSelector((s) => s.beds.items);
+  const beds = useAppSelector((s) => s.beds.items) as BedRead[];
 
   const [serviceId, setServiceId] = useState('');
   const [selectedBed, setSelectedBed] = useState<BedRead | null>(null);
@@ -69,7 +69,7 @@ export function BedBoardPage() {
 
   const counts = useMemo(() => {
     const c = { free: 0, reserved: 0, occupied: 0 };
-    for (const bed of beds) c[bed.status]++;
+    for (const bed of beds) c[bed.status as BedStatus]++;
     return c;
   }, [beds]);
 

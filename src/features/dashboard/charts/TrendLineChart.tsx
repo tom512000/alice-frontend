@@ -36,7 +36,7 @@ export function TrendLineChart({ data, xTickFormatter, color = SEQUENTIAL_BLUE, 
         <Tooltip
           content={<ChartTooltipContent />}
           cursor={{ stroke: '#c3c2b7', strokeWidth: 1 }}
-          labelFormatter={(v: string) => xTickFormatter(v)}
+          labelFormatter={(v) => xTickFormatter(v == null ? '' : String(v))}
         />
         <Area
           type="monotone"

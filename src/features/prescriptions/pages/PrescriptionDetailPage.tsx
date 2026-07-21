@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/Toast';
 import { formatName } from '@/lib/format';
 import { isAdmin, isDoctor } from '@/lib/permissions';
 import { ArrowLeft, Download, Pencil, Pill } from 'lucide-react';
+import type { MedicineRead, TreatmentRead } from '@/types/entities';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -76,14 +77,14 @@ export function PrescriptionDetailPage() {
           <CardBody>
             {current.treatments && current.treatments.length > 0 ? (
               <ul className="space-y-3">
-                {current.treatments.map((t) => (
+                {current.treatments.map((t: TreatmentRead) => (
                   <li key={t['@id'] ?? t.id} className="flex items-start gap-2 p-3 bg-gray-50 rounded-md">
                     <Pill className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
                     <div>
                       <p className="text-sm font-medium">{t.name}</p>
                       {t.posology && <p className="text-xs text-gray-500 mt-0.5">{t.posology}</p>}
                       {t.medicines && t.medicines.length > 0 && (
-                        <p className="text-xs text-gray-400 mt-0.5">{t.medicines.map((m) => m.name).join(', ')}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{t.medicines.map((m: MedicineRead) => m.name).join(', ')}</p>
                       )}
                     </div>
                   </li>
