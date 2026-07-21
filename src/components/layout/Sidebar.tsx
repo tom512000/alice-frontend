@@ -7,7 +7,7 @@ import {
   BedDouble, HeartPulse, FlaskConical, ClipboardList, Pill,
   Scissors, Shield, ChevronRight, Hospital, Activity,
   FileText, MessageSquare, ClipboardCheck,
-  FileCheck, ScrollText, Lock, LayoutGrid, X, Network,
+  FileCheck, ScrollText, LayoutGrid, X, Network,
 } from 'lucide-react';
 
 interface NavItem {
@@ -54,12 +54,6 @@ function buildNav(roles: string[]): NavGroup[] {
         { to: '/documents', icon: <FileText className="h-4 w-4" />, label: 'Documents' },
         { to: '/comments', icon: <MessageSquare className="h-4 w-4" />, label: 'Commentaires' },
         { to: '/consents', icon: <FileCheck className="h-4 w-4" />, label: 'Consentements' },
-      ],
-    },
-    {
-      label: 'Mon compte',
-      items: [
-        { to: '/settings/security', icon: <Lock className="h-4 w-4" />, label: 'Sécurité (2FA)' },
       ],
     },
   ];

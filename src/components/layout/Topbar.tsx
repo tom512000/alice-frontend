@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, ChevronRight, Menu, Search } from 'lucide-react';
+import { LogOut, User, ChevronRight, ChevronDown, Menu, Search, Lock } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { PatientQuickSearch } from './PatientQuickSearch';
 
@@ -80,8 +80,21 @@ export function Topbar({ sidebarWidth, onMenuClick }: { sidebarWidth: number; on
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function handleLogout() {
+    setUserMenuOpen(false);
     dispatch(logout());
     navigate('/login');
   }
@@ -116,20 +129,39 @@ export function Topbar({ sidebarWidth, onMenuClick }: { sidebarWidth: number; on
             <Search className="h-4.5 w-4.5" />
           </button>
 
-          <div className="flex items-center gap-2 text-sm font-poppins text-gray-700">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-600">
-              <User className="h-4 w-4" />
-            </div>
-            <span className="hidden sm:inline">{user?.login}</span>
-          </div>
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-md px-1.5 py-1 text-sm font-poppins text-gray-700 hover:bg-gray-100"
+              aria-label="Menu du compte"
+            >
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+                <User className="h-4 w-4" />
+              </div>
+              <span className="hidden sm:inline">{user?.login}</span>
+              <ChevronDown className={cn('h-3.5 w-3.5 text-gray-400 transition-transform', userMenuOpen && 'rotate-180')} />
+            </button>
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 text-xs font-poppins text-gray-500 hover:text-gray-800 transition-colors px-2 py-1.5 rounded-md hover:bg-gray-100"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Déconnexion</span>
-          </button>
+            {userMenuOpen && (
+              <div className="absolute right-0 top-full z-30 mt-1 w-52 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                <button
+                  onClick={() => { setUserMenuOpen(false); navigate('/settings/security'); }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <Lock className="h-4 w-4 text-gray-400" />
+                  Sécurité (2FA)
+                </button>
+                <div className="my-1 border-t border-gray-100" />
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left font-poppins text-sm text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Déconnexion
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
