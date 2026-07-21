@@ -1,15 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { staysActions } from '../staysSlice';
+import { generateDischargeSummary } from '@/api/aiApi';
 import { PageHeader } from '@/components/layout/Layout';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useToast } from '@/components/ui/Toast';
 import { formatDate, formatDateTime, formatName } from '@/lib/format';
 import { isAdmin, isDoctor, isNurse } from '@/lib/permissions';
-import { Pencil, ArrowLeft, Activity } from 'lucide-react';
+import { Pencil, ArrowLeft, Activity, Sparkles, Copy } from 'lucide-react';
 
 export function StayDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,8 +21,32 @@ export function StayDetailPage() {
   const { current, loading } = useAppSelector((s) => s.stays);
   const roles = useAppSelector((s) => s.auth.user?.roles ?? []);
   const canWrite = isAdmin(roles) || isDoctor(roles) || isNurse(roles);
+  const { toastSuccess, toastError } = useToast();
+
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => { if (id) dispatch(staysActions.fetchOne(id)); }, [id, dispatch]);
+
+  async function handleGenerateSummary() {
+    if (!id) return;
+    setGenerating(true);
+    setSummaryOpen(true);
+    try {
+      setSummary(await generateDischargeSummary(id));
+    } catch {
+      setSummaryOpen(false);
+      toastError('Génération IA indisponible pour le moment.');
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  async function copySummary() {
+    await navigator.clipboard.writeText(summary);
+    toastSuccess('Copié dans le presse-papiers.');
+  }
 
   if (loading) return <Skeleton className="h-96" />;
   if (!current) return null;
@@ -32,6 +59,9 @@ export function StayDetailPage() {
         actions={
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate('/stays')} icon={<ArrowLeft className="h-4 w-4" />}>Retour</Button>
+            <Button variant="outline" size="sm" onClick={handleGenerateSummary} icon={<Sparkles className="h-4 w-4" />}>
+              Compte-rendu de sortie (IA)
+            </Button>
             {canWrite && <Button size="sm" onClick={() => navigate(`/stays/${id}/edit`)} icon={<Pencil className="h-4 w-4" />}>Modifier</Button>}
           </div>
         }
@@ -79,6 +109,29 @@ export function StayDetailPage() {
           </Card>
         )}
       </div>
+
+      <Modal open={summaryOpen} onClose={() => setSummaryOpen(false)} title="Compte-rendu de sortie (brouillon IA)" size="lg">
+        {generating ? (
+          <div className="space-y-2 py-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ) : (
+          <>
+            <p className="text-xs text-gray-400 font-poppins mb-3">
+              Brouillon généré à partir des données du séjour — à relire et valider avant tout usage.
+            </p>
+            <div className="max-h-96 overflow-y-auto rounded-md bg-gray-50 p-4">
+              <p className="text-sm font-poppins text-gray-800 whitespace-pre-wrap">{summary}</p>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" size="sm" onClick={() => setSummaryOpen(false)}>Fermer</Button>
+              <Button size="sm" onClick={copySummary} icon={<Copy className="h-3.5 w-3.5" />}>Copier</Button>
+            </div>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

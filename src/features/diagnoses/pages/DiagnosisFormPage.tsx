@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +8,7 @@ import { diagnosesActions } from '../diagnosesSlice';
 import { patientsActions } from '@/features/patients/patientsSlice';
 import { usersActions } from '@/features/users/usersSlice';
 import { icd10Actions } from '@/features/icd10/icd10Slice';
+import { suggestIcd10, type Icd10Suggestion } from '@/api/aiApi';
 import { PageHeader } from '@/components/layout/Layout';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -17,7 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
 import { useToast } from '@/components/ui/Toast';
 import { formatName, formatDateTimeInput } from '@/lib/format';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, Sparkles } from 'lucide-react';
 
 const schema = z.object({
   patient: z.string().min(1, 'Patient requis'),
@@ -49,12 +50,39 @@ export function DiagnosisFormPage() {
   const users = useAppSelector((s) => s.users.items);
   const icd10Codes = useAppSelector((s) => s.icd10.items);
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, getValues, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { type: 'principal', certainty: 'confirmed' },
   });
 
   const icd10Reg = register('icd10Code');
+
+  const [suggestions, setSuggestions] = useState<Icd10Suggestion[]>([]);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestAttempted, setSuggestAttempted] = useState(false);
+
+  async function handleSuggest() {
+    const label = getValues('label')?.trim();
+    if (!label) {
+      toastError('Saisis le libellé du diagnostic avant de demander une suggestion.');
+      return;
+    }
+    setSuggesting(true);
+    setSuggestAttempted(true);
+    try {
+      setSuggestions(await suggestIcd10(label));
+    } catch {
+      toastError("Suggestion IA indisponible pour le moment.");
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
+  function applySuggestion(s: Icd10Suggestion) {
+    setValue('icd10Code', s.code);
+    setValue('label', s.label);
+    setSuggestions([]);
+  }
 
   useEffect(() => {
     dispatch(patientsActions.fetchList({ page: 1, itemsPerPage: 100 }));
@@ -137,7 +165,42 @@ export function DiagnosisFormPage() {
                     error={errors.icd10Code?.message}
                   />
                 </FormGrid>
-                <Input label="Libellé du diagnostic *" {...register('label')} error={errors.label?.message} />
+                <div>
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Input label="Libellé du diagnostic *" {...register('label')} error={errors.label?.message} />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      loading={suggesting}
+                      onClick={handleSuggest}
+                      icon={<Sparkles className="h-3.5 w-3.5" />}
+                    >
+                      Suggérer (IA)
+                    </Button>
+                  </div>
+                  {suggestions.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {suggestions.map((s) => (
+                        <button
+                          key={s.code}
+                          type="button"
+                          onClick={() => applySuggestion(s)}
+                          className="w-full text-left p-2.5 rounded-md border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="text-xs font-mono font-semibold text-gray-700">{s.code}</span>
+                          <span className="text-sm font-medium text-gray-800 ml-2">{s.label}</span>
+                          {s.rationale && <p className="text-xs text-gray-500 mt-0.5">{s.rationale}</p>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {suggestAttempted && !suggesting && suggestions.length === 0 && (
+                    <p className="mt-1.5 text-xs text-gray-400">Aucune suggestion trouvée pour ce libellé.</p>
+                  )}
+                </div>
                 <FormGrid cols={2}>
                   <Select label="Type" {...register('type')} options={TYPES.map((t) => ({ value: t, label: TYPE_LABELS[t] }))} error={errors.type?.message} />
                   <Select label="Certitude" {...register('certainty')} options={CERTAINTIES.map((c) => ({ value: c, label: CERTAINTY_LABELS[c] }))} error={errors.certainty?.message} />
