@@ -7,6 +7,7 @@ export interface UserRead {
   '@id': string;
   id: number;
   login: string;
+  email: string | null;
   roles: string[];
   lastname: string;
   firstname: string;
@@ -29,6 +30,7 @@ export type IdentityStatus =
 
 export interface UserWrite {
   login: string;
+  email?: string | null;
   roles: string[];
   plainPassword?: string;
   lastname: string;

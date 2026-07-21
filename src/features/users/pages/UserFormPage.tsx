@@ -18,6 +18,7 @@ import { Save, ArrowLeft } from 'lucide-react';
 
 const schema = z.object({
   login: z.string().min(3, 'Login requis (min 3 caractères)'),
+  email: z.string().email('Email invalide').optional().or(z.literal('')),
   firstname: z.string().min(1, 'Prénom requis'),
   lastname: z.string().min(1, 'Nom requis'),
   plainPassword: z.string().optional().nullable(),
@@ -50,6 +51,7 @@ export function UserFormPage() {
           const mainRole = u.roles.find((r) => r !== 'ROLE_USER') ?? 'ROLE_USER';
           reset({
             login: u.login,
+            email: u.email ?? '',
             firstname: u.firstname,
             lastname: u.lastname,
             roleKey: mainRole,
@@ -65,6 +67,7 @@ export function UserFormPage() {
     const roles = data.roleKey === 'ROLE_USER' ? ['ROLE_USER'] : [data.roleKey, 'ROLE_USER'];
     const payload: Record<string, unknown> = {
       login: data.login,
+      email: data.email || null,
       firstname: data.firstname,
       lastname: data.lastname,
       roles,
@@ -103,6 +106,9 @@ export function UserFormPage() {
                 </FormGrid>
                 <FormGrid cols={2}>
                   <Input label="Login *" {...register('login')} error={errors.login?.message} autoComplete="username" />
+                  <Input label="Email" type="email" {...register('email')} error={errors.email?.message} autoComplete="email" />
+                </FormGrid>
+                <FormGrid cols={2}>
                   <Input label={isEdit ? 'Nouveau mot de passe' : 'Mot de passe *'} type="password" {...register('plainPassword')} autoComplete="new-password" />
                 </FormGrid>
               </FormSection>

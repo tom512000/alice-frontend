@@ -35,6 +35,7 @@ export function UserListPage() {
   const columns: Column<UserRead>[] = [
     { key: 'login', header: 'Login', render: (r) => <span className="font-mono text-sm">{r.login}</span> },
     { key: 'name', header: 'Nom', render: (r) => <span className="font-medium">{formatName(r.lastname, r.firstname)}</span> },
+    { key: 'email', header: 'Email', render: (r) => <span className="text-xs text-gray-500">{r.email ?? '—'}</span> },
     { key: 'roles', header: 'Rôles', render: (r) => <div className="flex gap-1 flex-wrap">{r.roles.filter((role) => role !== 'ROLE_USER' || r.roles.length === 1).map((role) => <Badge key={role} variant="outline">{ROLE_LABELS[role] ?? role}</Badge>)}</div> },
     { key: 'service', header: 'Service', render: (r) => <span className="text-xs text-gray-500">{r.service?.serviceName ?? '—'}</span> },
     { key: 'specialty', header: 'Spécialité', render: (r) => <span className="text-xs text-gray-500">{r.specialty?.name ?? '—'}</span> },
