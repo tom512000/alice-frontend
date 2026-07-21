@@ -36,12 +36,12 @@ export function AppointmentFormPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toastSuccess, toastError } = useToast();
-  const { current, saving, error } = useAppSelector((s) => s.appointments);
+  const { saving, error } = useAppSelector((s) => s.appointments);
   const patients = useAppSelector((s) => s.patients.items);
   const doctors = useAppSelector((s) => s.users.items);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
     defaultValues: { status: 'scheduled' },
   });

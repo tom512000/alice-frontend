@@ -15,10 +15,13 @@ export function Layout({ children }: LayoutProps) {
   const sidebarWidth = collapsed ? 56 : 224;
   const location = useLocation();
 
-  // Ferme le drawer mobile à chaque navigation.
-  useEffect(() => {
+  // Ferme le drawer mobile à chaque navigation (ajustement pendant le rendu,
+  // pas dans un effet, pour éviter un rendu en cascade superflu).
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
     setMobileOpen(false);
-  }, [location.pathname]);
+  }
 
   // En dessous du breakpoint `lg`, le sidebar est un drawer overlay : on le force fermé
   // dès qu'on franchit la limite (dans un sens ou l'autre) pour ne jamais le laisser

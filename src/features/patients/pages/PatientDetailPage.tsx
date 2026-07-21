@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabTrigger, TabPanel } from '@/components/ui/Tabs';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatDate, formatName, getAge, formatGender } from '@/lib/format';
 import { isAdmin, isDoctor } from '@/lib/permissions';
-import { Pencil, ArrowLeft, User, Phone, MapPin, Heart, AlertTriangle } from 'lucide-react';
+import { Pencil, ArrowLeft, Phone, AlertTriangle } from 'lucide-react';
 import { PatientConsultationsTab } from '../components/PatientConsultationsTab';
 import { PatientAppointmentsTab } from '../components/PatientAppointmentsTab';
 import { PatientStaysTab } from '../components/PatientStaysTab';

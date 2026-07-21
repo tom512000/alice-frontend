@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { patientsActions } from '../patientsSlice';
 import { usersActions } from '@/features/users/usersSlice';
-import { allergiesActions } from '@/features/allergies/allergiesSlice';
 import { PageHeader } from '@/components/layout/Layout';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -14,10 +13,9 @@ import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
 import { useToast } from '@/components/ui/Toast';
-import { IRI } from '@/lib/iri';
 import { formatName, formatDateInput, IDENTITY_STATUS_LABELS } from '@/lib/format';
 import { Save, ArrowLeft } from 'lucide-react';
-import type { PatientWrite, IdentityStatus } from '@/types/entities';
+import type { PatientWrite } from '@/types/entities';
 
 const schema = z.object({
   lastname: z.string().min(1, 'Nom requis'),
@@ -48,7 +46,7 @@ export function PatientFormPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toastSuccess, toastError } = useToast();
-  const { current, saving, error } = useAppSelector((s) => s.patients);
+  const { saving, error } = useAppSelector((s) => s.patients);
   const doctors = useAppSelector((s) => s.users.items);
 
   const {

@@ -68,17 +68,22 @@ export function RoomPickerModal({
     dispatch(bedsActions.fetchList({ page: 1, itemsPerPage: 200, 'room.service': effectiveServiceId }));
   }, [open, effectiveServiceId, dispatch]);
 
-  // À l'ouverture, surligne la salle correspondant à la valeur courante ; réinit à la fermeture.
-  useEffect(() => {
+  // Réinitialise à la fermeture (ajustement pendant le rendu, pas dans un effet).
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (!open) {
       setSelectedRoomIri(null);
       setServiceId('');
-      return;
     }
-    if (currentValue) {
-      const match = rooms.find((r) => r.name === currentValue);
-      if (match) setSelectedRoomIri(match['@id']);
-    }
+  }
+
+  // À l'ouverture, surligne la salle correspondant à la valeur courante.
+  useEffect(() => {
+    if (!open || !currentValue) return;
+    const match = rooms.find((r) => r.name === currentValue);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (match) setSelectedRoomIri(match['@id']);
     // On ne veut réagir qu'à l'ouverture et à l'arrivée des salles, pas à chaque frappe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, rooms]);
@@ -146,19 +151,17 @@ export function RoomPickerModal({
                   onSelect(room);
                   onClose();
                 }}
-                className={`absolute rounded-lg border-2 bg-white text-left shadow-sm transition-colors ${
-                  isSelected
-                    ? 'border-gray-900 ring-2 ring-gray-900/20'
-                    : 'border-gray-300 hover:border-gray-500'
-                }`}
+                className={`absolute rounded-lg border-2 bg-white text-left shadow-sm transition-colors ${isSelected
+                  ? 'border-gray-900 ring-2 ring-gray-900/20'
+                  : 'border-gray-300 hover:border-gray-500'
+                  }`}
                 style={{ left: room.positionX, top: room.positionY, width: room.width, height: room.height }}
               >
                 <div
-                  className={`flex items-center justify-between gap-1 truncate rounded-t-md border-b px-2 py-1 text-xs font-semibold font-lexend ${
-                    isSelected
-                      ? 'border-gray-300 bg-gray-900 text-white'
-                      : 'border-gray-200 bg-gray-100 text-gray-800'
-                  }`}
+                  className={`flex items-center justify-between gap-1 truncate rounded-t-md border-b px-2 py-1 text-xs font-semibold font-lexend ${isSelected
+                    ? 'border-gray-300 bg-gray-900 text-white'
+                    : 'border-gray-200 bg-gray-100 text-gray-800'
+                    }`}
                 >
                   <span className="truncate">{room.name}</span>
                   {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}

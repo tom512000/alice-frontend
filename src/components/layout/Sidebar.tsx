@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/cn';
 import { useAppSelector } from '@/app/hooks';
-import { isAdmin, isDoctor, isNurse } from '@/lib/permissions';
+import { isAdmin, isDoctor } from '@/lib/permissions';
 import {
   LayoutDashboard, Users, UserSquare2, Calendar, Stethoscope,
   BedDouble, HeartPulse, FlaskConical, ClipboardList, Pill,

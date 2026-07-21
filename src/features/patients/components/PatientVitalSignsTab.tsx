@@ -5,7 +5,7 @@ import { vitalSignsActions } from '@/features/vitalSigns/vitalSignsSlice';
 import { DataTable, type Column } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/Button';
 import { formatDateTime, formatName } from '@/lib/format';
-import { Plus, Heart } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { VitalSignRead } from '@/types/entities';
 
 export function PatientVitalSignsTab({ patientId }: { patientId: number }) {

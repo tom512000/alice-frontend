@@ -39,7 +39,6 @@ export function ConsultationFormPage() {
   const { saving, error } = useAppSelector((s) => s.consultations);
   const patients = useAppSelector((s) => s.patients.items);
   const doctors = useAppSelector((s) => s.users.items);
-  const currentUser = useAppSelector((s) => s.auth.user);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) as any });

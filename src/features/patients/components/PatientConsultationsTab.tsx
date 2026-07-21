@@ -12,7 +12,7 @@ import type { ConsultationRead } from '@/types/entities';
 export function PatientConsultationsTab({ patientId }: { patientId: number }) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { items, loading, totalItems } = useAppSelector((s) => s.consultations);
+  const { items, loading } = useAppSelector((s) => s.consultations);
   const roles = useAppSelector((s) => s.auth.user?.roles ?? []);
   const canWrite = isAdmin(roles) || isDoctor(roles);
 

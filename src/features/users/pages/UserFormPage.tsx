@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { FormSection, FormGrid, FormError } from '@/components/forms/FormSection';
 import { useToast } from '@/components/ui/Toast';
 import { Save, ArrowLeft } from 'lucide-react';
+import type { UserWrite } from '@/types/entities';
 
 const schema = z.object({
   login: z.string().min(3, 'Login requis (min 3 caractères)'),
@@ -82,10 +83,9 @@ export function UserFormPage() {
     };
     if (data.plainPassword) payload.plainPassword = data.plainPassword;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = isEdit && id
-      ? await dispatch(usersActions.updateOne({ id, data: payload as any }))
-      : await dispatch(usersActions.createOne(payload as any));
+      ? await dispatch(usersActions.updateOne({ id, data: payload as unknown as Partial<UserWrite> }))
+      : await dispatch(usersActions.createOne(payload as unknown as UserWrite));
 
     if (usersActions.createOne.fulfilled.match(result) || usersActions.updateOne.fulfilled.match(result)) {
       toastSuccess(isEdit ? 'Utilisateur mis à jour.' : 'Utilisateur créé.');

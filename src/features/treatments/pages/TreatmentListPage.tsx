@@ -9,7 +9,7 @@ import { ConfirmModal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { isAdmin, isDoctor } from '@/lib/permissions';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
-import type { TreatmentRead } from '@/types/entities';
+import type { TreatmentRead, MedicineRead, PathologyRead } from '@/types/entities';
 
 export function TreatmentListPage() {
   const dispatch = useAppDispatch();
@@ -29,8 +29,8 @@ export function TreatmentListPage() {
   const columns: Column<TreatmentRead>[] = [
     { key: 'name', header: 'Nom', render: (r) => <span className="font-medium">{r.name}</span> },
     { key: 'posology', header: 'Posologie', render: (r) => <span className="truncate max-w-sm block text-gray-600">{r.posology ?? '—'}</span> },
-    { key: 'medicines', header: 'Médicaments', render: (r) => <span className="text-xs text-gray-500">{r.medicines?.map((m: any) => m.name).join(', ') || '—'}</span> },
-    { key: 'pathologies', header: 'Pathologies', render: (r) => <span className="text-xs text-gray-500">{r.pathologies?.map((p: any) => p.name).join(', ') || '—'}</span> },
+    { key: 'medicines', header: 'Médicaments', render: (r) => <span className="text-xs text-gray-500">{r.medicines?.map((m: MedicineRead) => m.name).join(', ') || '—'}</span> },
+    { key: 'pathologies', header: 'Pathologies', render: (r) => <span className="text-xs text-gray-500">{r.pathologies?.map((p: PathologyRead) => p.name).join(', ') || '—'}</span> },
   ];
 
   return (

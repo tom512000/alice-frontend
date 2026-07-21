@@ -30,14 +30,12 @@ export function PatientQuickSearch({ variant = 'inline', onClose }: PatientQuick
   useEffect(() => {
     const trimmed = query.trim();
     if (trimmed.length < MIN_QUERY_LENGTH) {
-      setResults([]);
-      setLoading(false);
       return;
     }
 
     const currentRequest = ++requestId.current;
-    setLoading(true);
     const timer = setTimeout(() => {
+      setLoading(true);
       apiClient
         .get<PatientSearchResult[]>(`/${ENDPOINTS.PATIENT_SEARCH}`, { params: { q: trimmed } })
         .then((res) => {
