@@ -78,6 +78,9 @@ import { ConsentFormPage } from '@/features/consents/pages/ConsentFormPage';
 // Security (2FA)
 import { SecuritySettingsPage } from '@/features/security/pages/SecuritySettingsPage';
 
+// Organigramme (personnel — visible par tous les rôles)
+import { OrgChartPage } from '@/features/staff/pages/OrgChartPage';
+
 // Rooms & beds (plan visuel)
 import { BedBoardPage } from '@/features/rooms/pages/BedBoardPage';
 import { RoomPlanEditorPage } from '@/features/rooms/pages/RoomPlanEditorPage';
@@ -194,6 +197,9 @@ export const router = createBrowserRouter([
       { path: '/consents', element: <ConsentListPage /> },
       { path: '/consents/new', element: <ConsentFormPage /> },
       { path: '/consents/:id/edit', element: <ConsentFormPage /> },
+
+      // Organigramme du personnel (tous les rôles)
+      { path: '/org-chart', element: <OrgChartPage /> },
 
       // Sécurité du compte (2FA)
       { path: '/settings/security', element: <SecuritySettingsPage /> },

@@ -6,22 +6,43 @@ import { cn } from '@/lib/cn';
 
 const ROUTE_LABELS: Record<string, string> = {
   '': 'Tableau de bord',
+  forbidden: 'Accès refusé',
+  // Général / clinique
   patients: 'Patients',
   appointments: 'Planning',
+  'org-chart': 'Organigramme',
   consultations: 'Consultations',
   stays: 'Hospitalisations',
+  beds: 'Chambres & lits',
   observations: 'Soins infirmiers',
   'vital-signs': 'Constantes vitales',
+  takes: 'Prises de traitement',
+  // Médical
   diagnoses: 'Diagnostics',
   'medical-exams': 'Examens médicaux',
+  'medical-histories': 'Antécédents médicaux',
   prescriptions: 'Prescriptions',
+  treatments: 'Traitements',
   'surgical-operations': 'Bloc opératoire',
+  documents: 'Documents',
+  comments: 'Commentaires',
+  consents: 'Consentements',
+  // Compte
+  settings: 'Paramètres',
+  security: 'Sécurité (2FA)',
+  // Administration
   admin: 'Administration',
   users: 'Utilisateurs',
+  audit: "Journal d'audit",
+  'room-plan': 'Plan des chambres',
   services: 'Services',
+  specialties: 'Spécialités',
   medicines: 'Médicaments',
   pathologies: 'Pathologies',
   allergies: 'Allergies',
+  holidays: 'Congés',
+  'treat-people': 'Personnes traitées',
+  // Actions
   new: 'Nouveau',
   edit: 'Modifier',
 };

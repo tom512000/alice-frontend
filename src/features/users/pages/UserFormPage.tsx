@@ -21,6 +21,8 @@ const schema = z.object({
   firstname: z.string().min(1, 'Prénom requis'),
   lastname: z.string().min(1, 'Nom requis'),
   plainPassword: z.string().optional().nullable(),
+  phone: z.string().max(30, 'Max 30 caractères').optional().nullable(),
+  number: z.string().max(50).optional().nullable(),
   roleKey: z.string().min(1, 'Rôle requis'),
   service: z.string().optional().nullable(),
   specialty: z.string().optional().nullable(),
@@ -53,6 +55,8 @@ export function UserFormPage() {
             firstname: u.firstname,
             lastname: u.lastname,
             roleKey: mainRole,
+            phone: u.phone ?? '',
+            number: u.number ?? '',
             service: u.service ? (typeof u.service === 'string' ? u.service : u.service['@id']) : '',
             specialty: u.specialty ? (typeof u.specialty === 'string' ? u.specialty : u.specialty['@id']) : '',
           });
@@ -68,6 +72,8 @@ export function UserFormPage() {
       firstname: data.firstname,
       lastname: data.lastname,
       roles,
+      phone: data.phone || null,
+      number: data.number || null,
       service: data.service || null,
       specialty: data.specialty || null,
     };
@@ -104,6 +110,10 @@ export function UserFormPage() {
                 <FormGrid cols={2}>
                   <Input label="Login *" {...register('login')} error={errors.login?.message} autoComplete="username" />
                   <Input label={isEdit ? 'Nouveau mot de passe' : 'Mot de passe *'} type="password" {...register('plainPassword')} autoComplete="new-password" />
+                </FormGrid>
+                <FormGrid cols={2}>
+                  <Input label="Téléphone" type="tel" {...register('phone')} error={errors.phone?.message} placeholder="Ex : 01 23 45 67 89" autoComplete="tel" />
+                  <Input label="N° RPPS / ADELI" {...register('number')} error={errors.number?.message} placeholder="Ex : RPPS-12345" />
                 </FormGrid>
               </FormSection>
             </CardBody>

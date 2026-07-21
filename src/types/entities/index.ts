@@ -13,6 +13,7 @@ export interface UserRead {
   birthdate: string | null;
   gender: 'M' | 'F' | 'O' | null;
   number: string | null;
+  phone: string | null;
   specialty: SpecialtyRead | null;
   service: ServiceRead | null;
   totpEnabled: boolean;
@@ -36,6 +37,7 @@ export interface UserWrite {
   birthdate?: string | null;
   gender?: 'M' | 'F' | 'O' | null;
   number?: string | null;
+  phone?: string | null;
   specialty?: string | null;
   service?: string | null;
 }

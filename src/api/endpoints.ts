@@ -30,6 +30,7 @@ export const ENDPOINTS = {
   CONSENTS: 'consents',
   DASHBOARD_STATS: 'dashboard/stats',
   AI_ICD10_SUGGEST: 'ai/icd10-suggest',
+  STAFF_DIRECTORY: 'staff/directory',
 } as const;
 
 export type EndpointKey = keyof typeof ENDPOINTS;

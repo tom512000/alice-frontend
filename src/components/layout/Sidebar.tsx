@@ -7,7 +7,7 @@ import {
   BedDouble, HeartPulse, FlaskConical, ClipboardList, Pill,
   Scissors, Shield, ChevronRight, Hospital, Activity,
   FileText, MessageSquare, ClipboardCheck,
-  FileCheck, ScrollText, Lock, LayoutGrid, X,
+  FileCheck, ScrollText, Lock, LayoutGrid, X, Network,
 } from 'lucide-react';
 
 interface NavItem {
@@ -30,6 +30,7 @@ function buildNav(roles: string[]): NavGroup[] {
         { to: '/', icon: <LayoutDashboard className="h-4 w-4" />, label: 'Tableau de bord' },
         { to: '/patients', icon: <UserSquare2 className="h-4 w-4" />, label: 'Patients' },
         { to: '/appointments', icon: <Calendar className="h-4 w-4" />, label: 'Planning' },
+        { to: '/org-chart', icon: <Network className="h-4 w-4" />, label: 'Organigramme' },
       ],
     },
     {
