@@ -32,6 +32,7 @@ export const ENDPOINTS = {
   AI_ICD10_SUGGEST: 'ai/icd10-suggest',
   STAFF_DIRECTORY: 'staff/directory',
   MONITORING_VITALS: 'monitoring/vitals',
+  MONITORING_HISTORY: 'monitoring/history',
 } as const;
 
 export type EndpointKey = keyof typeof ENDPOINTS;

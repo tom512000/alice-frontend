@@ -29,9 +29,21 @@ export const fetchVitals = createAsyncThunk('monitoring/fetchVitals', async () =
 interface MonitoringState {
   entries: BedVitals[];
   loaded: boolean;
+  /** Lits épinglés en card flottante (suivent l'utilisateur sur toute l'app). */
+  pinnedBedIds: number[];
 }
 
-const initialState: MonitoringState = { entries: [], loaded: false };
+function loadPinned(): number[] {
+  try {
+    const raw = localStorage.getItem('alice_pinned_beds');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'number') : [];
+  } catch {
+    return [];
+  }
+}
+
+const initialState: MonitoringState = { entries: [], loaded: false, pinnedBedIds: loadPinned() };
 
 const monitoringSlice = createSlice({
   name: 'monitoring',
@@ -42,6 +54,15 @@ const monitoringSlice = createSlice({
       state.entries = action.payload;
       state.loaded = true;
     },
+    togglePin(state, action: PayloadAction<number>) {
+      const id = action.payload;
+      state.pinnedBedIds = state.pinnedBedIds.includes(id)
+        ? state.pinnedBedIds.filter((x) => x !== id)
+        : [...state.pinnedBedIds, id];
+    },
+    unpin(state, action: PayloadAction<number>) {
+      state.pinnedBedIds = state.pinnedBedIds.filter((x) => x !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchVitals.fulfilled, (state, action) => {
@@ -51,5 +72,5 @@ const monitoringSlice = createSlice({
   },
 });
 
-export const { setVitals } = monitoringSlice.actions;
+export const { setVitals, togglePin, unpin } = monitoringSlice.actions;
 export default monitoringSlice.reducer;

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { MonitoringAlerts } from '@/features/monitoring/MonitoringAlerts';
+import { PinnedVitals } from '@/features/monitoring/PinnedVitals';
 
 interface LayoutProps {
   children: ReactNode;
@@ -49,6 +50,8 @@ export function Layout({ children }: LayoutProps) {
           {children}
         </div>
       </main>
+
+      <PinnedVitals />
     </div>
   );
 }

@@ -5,8 +5,10 @@ import { vitalSignsActions } from '../vitalSignsSlice';
 import { DataTable, type Column } from '@/components/data-table/DataTable';
 import { PageHeader } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/Button';
+import { Tabs, TabsList, TabTrigger, TabPanel } from '@/components/ui/Tabs';
+import { LiveVitalsBoard } from '@/features/monitoring/LiveVitalsBoard';
 import { formatDateTime, formatName } from '@/lib/format';
-import { Plus } from 'lucide-react';
+import { Plus, Radio } from 'lucide-react';
 import type { VitalSignRead } from '@/types/entities';
 
 export function VitalSignListPage() {
@@ -33,12 +35,23 @@ export function VitalSignListPage() {
 
   return (
     <div>
-      <PageHeader title="Constantes vitales" subtitle={`${totalItems} mesures`}
+      <PageHeader title="Constantes vitales" subtitle={`${totalItems} mesures enregistrées`}
         actions={<Button size="sm" onClick={() => navigate('/vital-signs/new')} icon={<Plus className="h-4 w-4" />}>Saisir</Button>}
       />
-      <DataTable columns={columns} data={items} loading={loading} totalItems={totalItems} page={page}
-        onPageChange={(p) => load(p)} getRowKey={(r) => r.id} emptyTitle="Aucune mesure"
-      />
+      <Tabs defaultTab="live">
+        <TabsList>
+          <TabTrigger value="live"><span className="flex items-center gap-1.5"><Radio className="h-3.5 w-3.5" /> Temps réel</span></TabTrigger>
+          <TabTrigger value="records">Relevés</TabTrigger>
+        </TabsList>
+        <TabPanel value="live">
+          <LiveVitalsBoard />
+        </TabPanel>
+        <TabPanel value="records">
+          <DataTable columns={columns} data={items} loading={loading} totalItems={totalItems} page={page}
+            onPageChange={(p) => load(p)} getRowKey={(r) => r.id} emptyTitle="Aucune mesure"
+          />
+        </TabPanel>
+      </Tabs>
     </div>
   );
 }

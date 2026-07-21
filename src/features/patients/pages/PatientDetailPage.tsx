@@ -15,6 +15,7 @@ import { PatientConsultationsTab } from '../components/PatientConsultationsTab';
 import { PatientAppointmentsTab } from '../components/PatientAppointmentsTab';
 import { PatientStaysTab } from '../components/PatientStaysTab';
 import { PatientVitalSignsTab } from '../components/PatientVitalSignsTab';
+import { PatientVitalsMonitor } from '@/features/monitoring/PatientVitalsMonitor';
 import { PatientDiagnosesTab } from '../components/PatientDiagnosesTab';
 import { PatientExamsTab } from '../components/PatientExamsTab';
 
@@ -155,7 +156,16 @@ export function PatientDetailPage() {
         <TabPanel value="consultations"><PatientConsultationsTab patientId={Number(id)} /></TabPanel>
         <TabPanel value="appointments"><PatientAppointmentsTab patientId={Number(id)} /></TabPanel>
         <TabPanel value="stays"><PatientStaysTab patientId={Number(id)} /></TabPanel>
-        <TabPanel value="vital-signs"><PatientVitalSignsTab patientId={Number(id)} /></TabPanel>
+        <TabPanel value="vital-signs">
+          <Tabs defaultTab="live">
+            <TabsList>
+              <TabTrigger value="live">Temps réel</TabTrigger>
+              <TabTrigger value="records">Relevés</TabTrigger>
+            </TabsList>
+            <TabPanel value="live"><PatientVitalsMonitor patientId={Number(id)} /></TabPanel>
+            <TabPanel value="records"><PatientVitalSignsTab patientId={Number(id)} /></TabPanel>
+          </Tabs>
+        </TabPanel>
         <TabPanel value="diagnoses"><PatientDiagnosesTab patientId={Number(id)} /></TabPanel>
         <TabPanel value="exams"><PatientExamsTab patientId={Number(id)} /></TabPanel>
       </Tabs>

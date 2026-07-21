@@ -23,13 +23,40 @@ const TILE: Record<VitalSeverity, string> = {
  * Se rafraîchit via le poll global du monitoring (store Redux) ; déclenche aussi
  * un fetch immédiat à l'ouverture pour ne pas attendre le prochain tick.
  */
-export function BedVitalsPanel({ bedId }: { bedId: number }) {
+export function BedVitalsPanel({ bedId, flat = false }: { bedId: number; flat?: boolean }) {
   const dispatch = useAppDispatch();
   const entry = useAppSelector((s) => s.monitoring.entries.find((e) => e.bedId === bedId));
 
   useEffect(() => {
     dispatch(fetchVitals());
   }, [dispatch]);
+
+  const tiles = !entry ? (
+    <p className="py-3 text-center text-xs text-gray-400 font-poppins">Connexion au moniteur…</p>
+  ) : (
+    <div className="grid grid-cols-3 gap-2">
+      {entry.metrics.map((m) => {
+        const Icon = ICONS[m.key] ?? Activity;
+        return (
+          <div
+            key={m.key}
+            className={cn('rounded-md border p-2', TILE[m.severity], m.severity === 'critical' && 'animate-pulse')}
+          >
+            <div className="flex items-center gap-1 font-poppins text-[10px] font-medium opacity-70">
+              <Icon className="h-3 w-3" /> {m.label}
+            </div>
+            <div className="mt-0.5 font-lexend text-sm font-semibold leading-none">
+              {m.value}
+              <span className="ml-0.5 text-[10px] font-normal opacity-70">{m.unit}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  // Mode « flat » : uniquement les tuiles (le conteneur/en-tête est fourni par l'appelant).
+  if (flat) return tiles;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-3">
@@ -53,29 +80,7 @@ export function BedVitalsPanel({ bedId }: { bedId: number }) {
         )}
       </div>
 
-      {!entry ? (
-        <p className="py-3 text-center text-xs text-gray-400 font-poppins">Connexion au moniteur…</p>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          {entry.metrics.map((m) => {
-            const Icon = ICONS[m.key] ?? Activity;
-            return (
-              <div
-                key={m.key}
-                className={cn('rounded-md border p-2', TILE[m.severity], m.severity === 'critical' && 'animate-pulse')}
-              >
-                <div className="flex items-center gap-1 font-poppins text-[10px] font-medium opacity-70">
-                  <Icon className="h-3 w-3" /> {m.label}
-                </div>
-                <div className="mt-0.5 font-lexend text-sm font-semibold leading-none">
-                  {m.value}
-                  <span className="ml-0.5 text-[10px] font-normal opacity-70">{m.unit}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {tiles}
 
       <p className="mt-2 font-poppins text-[10px] text-gray-400">Données simulées · rafraîchies automatiquement</p>
     </div>
